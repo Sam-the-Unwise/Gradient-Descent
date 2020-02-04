@@ -1,12 +1,14 @@
 import numpy as np
+import csv
 
-# function that does gradient descent
+# Function: gradientDescent
 # INPUT ARGS:
 #   X : a matrix of numeric inputs {Obervations x Feature}
 #   y : a vector of binary outputs {0,1}
 #   stepSize : learning rate - epsilon parameters
-#   maxIterations : pos int that controls how many steps to take
-def gradientDescent(X, y, stepSize, max_iterations):
+#   max_iterations : pos int that controls how many steps to take
+# Return: weight_matrix
+def gradientDescent(X, y, step_size, max_iterations):
 
     # VARIABLES
 
@@ -17,7 +19,8 @@ def gradientDescent(X, y, stepSize, max_iterations):
     X_arr_col = arr_dim[1]
 
     wm_total_entries = X_arr_col * max_iterations
-    # variable that initiates to the zero vector
+
+    # variable that initiates to the weight vector
     weight_vector = np.zeros(X_arr_col)
 
     # matrix for real numbers
@@ -29,35 +32,54 @@ def gradientDescent(X, y, stepSize, max_iterations):
 
 
     # ALGORITHM
-    for(index in range(0, maxIterations)):
-
+    for index in range(0, max_iterations):
         #calculate y_tid
         y_tild = -1
 
-        if(y == 1):
+        if(y[index] == 1):
             y_tild = 1
 
-        # calculate gradiant
-        gradient = (1/(1+numpy.exp((-y_tild)*weight_vector*X[index]))*
-                    (numpy.exp((-y_tild)*weight_vector*X[index]))*
-                    ((-y_tild)*X[index]))
+        # variables for simplification
+        weight_vector_transpose = np.transpose(weight_vector)
+        verctor_mult = np.multiply(weight_vector_transpose, X[0,:])
+        inner_exp = np.multiply(y_tild, verctor_mult)
+        # calculate gradient
+        gradient = (1/(1+np.exp(inner_exp))*
+                    (np.exp(inner_exp))*
+                    ((-y_tild)*X[index,:]))
+
 
         # update weight_vector depending on positive or negative
         # If negative, you add to the steps
-        np.multiply(weight_vector, 1)
+        if y_tild == -1:
+            weight_vector += gradient
 
         # If positive, you subtract it
-        if y_tild == 1:
-            np.multiply(weight_vector, -1)
+        elif y_tild == 1:
+            weight_vector -= gradient
 
+        #print(weight_vector)
         # store the resulting weight_vector in the corresponding column weight_matrix
-        weight_matrix.item((index, 1)) = weight_vector
+        weight_matrix[: ,index] = weight_vector
 
 
     # end of algorithm
     return weight_matrix
 
+# Function: gradientDescent
+# INPUT ARGS:
+#   X : a matrix of numeric inputs {Obervations x Feature}
+# Return: weight_matrix
+#def calc_step_size(X):
 
-matrix = np.array([ [0,0], [0,0], [0,0] ])
 
-gradientDescent(matrix,0,0,5)
+with open("spam.data", 'r') as data_file:
+    spam_file = list(csv.reader(data_file, delimiter = " "))
+
+data_matrix_full = np.array(spam_file[0:], dtype=np.float)
+
+data_matrix_test = np.delete(data_matrix_full, -1, 1)
+
+binary_vector = data_matrix_full[:,57]
+
+print(gradientDescent(data_matrix_test,binary_vector,.5,4601))
