@@ -29,35 +29,35 @@ def gradientDescent(X, y, stepSize, max_iterations):
 
 
     # ALGORITHM
-    for(index in range(maxIterations)):
+    for(index in range(0, maxIterations)):
+
         #calculate y_tid
         y_tild = -1
 
         if(y == 1):
             y_tild = 1
 
+        # calculate gradiant
         gradient = (1/(1+numpy.exp((-y_tild)*weight_vector*X[index]))*
                     (numpy.exp((-y_tild)*weight_vector*X[index]))*
                     ((-y_tild)*X[index]))
 
         # update weight_vector depending on positive or negative
         # If negative, you add to the steps
-        weight_vector +=
+        np.multiply(weight_vector, 1)
+
         # If positive, you subtract it
+        if y_tild == 1:
+            np.multiply(weight_vector, -1)
 
         # store the resulting weight_vector in the corresponding column weight_matrix
         weight_matrix.item((index, 1)) = weight_vector
 
 
-
-
-    # compute gradiant
-    #
-
     # end of algorithm
     return weight_matrix
 
 
-matrix = np.array([[0,0],[0,0],[0,0]])
+matrix = np.array([ [0,0], [0,0], [0,0] ])
 
 gradientDescent(matrix,0,0,5)
