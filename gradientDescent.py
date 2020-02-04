@@ -41,7 +41,7 @@ def gradientDescent(X, y, step_size, max_iterations):
 
         # variables for simplification
         weight_vector_transpose = np.transpose(weight_vector)
-        verctor_mult = np.multiply(weight_vector_transpose, X[0,:])
+        verctor_mult = np.multiply(weight_vector_transpose, X[index,:])
         inner_exp = np.multiply(y_tild, verctor_mult)
         # calculate gradient
         gradient = (1/(1+np.exp(inner_exp))*
@@ -79,7 +79,8 @@ with open("spam.data", 'r') as data_file:
 data_matrix_full = np.array(spam_file[0:], dtype=np.float)
 
 data_matrix_test = np.delete(data_matrix_full, -1, 1)
+print(data_matrix_test)
 
 binary_vector = data_matrix_full[:,57]
 
-print(gradientDescent(data_matrix_test,binary_vector,.5,4601))
+gradientDescent(data_matrix_test,binary_vector,.5,4601)
