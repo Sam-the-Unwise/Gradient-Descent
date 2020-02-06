@@ -44,6 +44,7 @@ def gradientDescent(X, y, step_size, max_iterations):
         verctor_mult = np.multiply(weight_vector_transpose, X[index,:])
         inner_exp = np.multiply(y_tild, verctor_mult)
         # calculate gradient
+
         gradient = (1/(1+np.exp(inner_exp))*
                     (np.exp(inner_exp))*
                     ((-y_tild)*X[index,:]))
@@ -66,21 +67,37 @@ def gradientDescent(X, y, step_size, max_iterations):
     # end of algorithm
     return weight_matrix
 
-# Function: gradientDescent
-# INPUT ARGS:
-#   X : a matrix of numeric inputs {Obervations x Feature}
-# Return: weight_matrix
-#def calc_step_size(X):
+def scale(matrix):
+    matrix_t = np.transpose(matrix)
+    col_sq_sum = 0
+    for column in matrix_t:
+        sum = np.sum(column)
+        shape = column.shape
+        size = shape[0]
+        mean = sum/size
+        for item in column:
+            col_sq_sum += (item - mean)**2
+        std = col_sq_sum/size
+        column -= mean
+        column /= std
 
 
-with open("spam.data", 'r') as data_file:
-    spam_file = list(csv.reader(data_file, delimiter = " "))
+def convert_data_to_matrix(file_name):
+    with open(file_name, 'r') as data_file:
+        spam_file = list(csv.reader(data_file, delimiter = " "))
 
-data_matrix_full = np.array(spam_file[0:], dtype=np.float)
+    data_matrix_full = np.array(spam_file[0:], dtype=np.float)
+    return data_matrix_full
+
+data_matrix_full = convert_data_to_matrix("spam.data")
 
 data_matrix_test = np.delete(data_matrix_full, -1, 1)
-print(data_matrix_test)
 
 binary_vector = data_matrix_full[:,57]
 
-gradientDescent(data_matrix_test,binary_vector,.5,4601)
+scale(data_matrix_test)
+
+
+
+print(gradientDescent(data_matrix_test[:500 , :],binary_vector,.05,100))
+
