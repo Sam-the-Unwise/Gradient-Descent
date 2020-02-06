@@ -1,6 +1,6 @@
 import numpy as np
 import csv
-
+from math import sqrt
 # Function: gradientDescent
 # INPUT ARGS:
 #   X : a matrix of numeric inputs {Obervations x Feature}
@@ -69,17 +69,27 @@ def gradientDescent(X, y, step_size, max_iterations):
 
 def scale(matrix):
     matrix_t = np.transpose(matrix)
-    col_sq_sum = 0
+    counter = 0
+
     for column in matrix_t:
+        counter += 1
+        col_sq_sum = 0
+
         sum = np.sum(column)
         shape = column.shape
-        size = shape[0]
-        mean = sum/size
+        col_size = shape[0]
+        mean = sum/col_size
+
         for item in column:
-            col_sq_sum += (item - mean)**2
-        std = col_sq_sum/size
+            col_sq_sum += ((item - mean)**2)
+
+        std = sqrt(col_sq_sum/col_size)
+
+        print(f"{counter} : mean {mean} std: {std}")
         column -= mean
+        #print(f"col - {column}\n")
         column /= std
+        #print(f"col / {column}")
 
 
 def convert_data_to_matrix(file_name):
@@ -91,7 +101,9 @@ def convert_data_to_matrix(file_name):
 
 data_matrix_full = convert_data_to_matrix("spam.data")
 
-data_matrix_test = np.delete(data_matrix_full, -1, 1)
+col_length = data_matrix_full.shape[1]
+
+data_matrix_test = np.delete(data_matrix_full, col_length - 1, 1)
 
 binary_vector = data_matrix_full[:,57]
 
@@ -99,5 +111,5 @@ scale(data_matrix_test)
 
 
 
-print(gradientDescent(data_matrix_test[:500 , :],binary_vector,.05,100))
+gradientDescent(data_matrix_test,binary_vector,.05,100)
 
