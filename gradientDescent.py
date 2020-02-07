@@ -121,20 +121,8 @@ def main():
     # shape yields tuple : (row, col)
     col_length = data_matrix_full.shape[1]
 
-    # count = 0
-    # for element in data_matrix_full:
-    #     if count is 0:
-    #         print(element)
-    #     count += 1
-
     data_matrix_test = np.delete(data_matrix_full, col_length - 1, 1) # delete last column
     binary_vector = data_matrix_full[:,57]
-
-    # count = 0
-    # for element in data_matrix_test:
-    #     if count is 0:
-    #         print(element)
-    #     count += 1
 
     test_col_length = data_matrix_full.shape[1]
 
@@ -154,40 +142,64 @@ def main():
         if int(item[col_length - 1]) == 0:
             count_of_zeros += 1
 
-    # print(count_of_zeros)
+    print(count_of_zeros)
     # print(count_of_ones)
 
     # divide num of zero items into 60-20-20
     zero_train_data_count = count_of_zeros * .6
+    print(zero_train_data_count)
     zero_val_data_count = count_of_zeros * .2
+    print(zero_val_data_count)
     zero_test_data_count = count_of_zeros * .2
+    print(zero_test_data_count)
 
     # divide num of one items into 60-20-20
-    one_train_data_count = count_of_ones * .6
-    one_val_data_count = count_of_ones * .2
-    one_test_data_count = count_of_ones * .2
+    one_train_data_count = int(count_of_ones * .6)
+    one_val_data_count = int(count_of_ones * .2)
+    one_test_data_count = int(count_of_ones * .2)
 
     # loop through matrix and assign certain items to different matrixes
     #       assign 60 to train, 20 to val, and 20 to test
-    zero_train_data = np.array(np
-                        .zeros(wm_total_entries)
-                        .reshape(X_arr_col, max_iterations))
-    zero_val_data = np.array(np
-                        .zeros(wm_total_entries)
-                        .reshape(X_arr_col, max_iterations))
-    zero_test_data = np.array(np
-                        .zeros(wm_total_entries)
-                        .reshape(X_arr_col, max_iterations))
+    zero_train_data = np.array([])
+    zero_val_data = np.array([])    
+    zero_test_data = np.array([])
 
-    one_train_data = np.array(np
-                        .zeros(wm_total_entries)
-                        .reshape(X_arr_col, max_iterations))
-    one_val_data = np.array(np
-                        .zeros(wm_total_entries)
-                        .reshape(X_arr_col, max_iterations))
-    one_test_data = np.array(np
-                        .zeros(wm_total_entries)
-                        .reshape(X_arr_col, max_iterations))
+    # to do this, we must assume that the data_matrix_test is still in the same order as the binary_vector#
+
+    # create index count that will keep track of the index we're at in the data_matrix_test and binary_vector
+    index_count = 0
+    # create count that will count the total number of zero-data we've added
+    zero_count = 0
+
+    for data_list in data_matrix_test:
+        # check if this row is one of 0 data by checking binary_vector
+        if int(binary_vector[index_count]) is 0:
+
+            # append the first 60% of data to the zero_train_data
+            if zero_count < zero_train_data_count:
+                zero_train_data = np.append(zero_train_data, [data_list])
+
+            # append the next 20% of data to the zero_val_data
+            elif zero_count < (zero_train_data_count + zero_val_data_count):
+                zero_val_data = np.append(zero_val_data, data_list)
+            
+            # append the last 20% of data to the zero_test_data
+            elif zero_count < (zero_train_data_count + zero_val_data_count + zero_test_data_count):
+                zero_test_data = np.append(zero_test_data, data_list)
+
+            zero_count += 1
+
+        index_count += 1
+
+    for item in zero_train_data:
+        print(item)
+
+
+
+
+    one_train_data = np.array(np.zeros(one_train_data_count))
+    one_val_data = np.array(np.zeros(one_val_data_count))
+    one_test_data = np.array(np.zeros(one_test_data_count))
 
 
     # np.random.shuffle(data_matrix_test)
