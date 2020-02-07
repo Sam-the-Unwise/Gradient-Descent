@@ -27,7 +27,7 @@ def gradientDescent(X, y, step_size, max_iterations):
     #   row of #s = num of inputs
     #   num of cols = maxIterations
     weight_matrix = np.array(np
-                        .zeros(wm_total_entries)
+                        .zeros(wm_total_entries,dtype=float)
                         .reshape(X_arr_col, max_iterations))
 
     # ALGORITHM
@@ -63,11 +63,10 @@ def gradientDescent(X, y, step_size, max_iterations):
         weight_vector = weight_vector - np.multiply(step_size, mean_grad_log_loss)
 
         # store the resulting weight_vector in the corresponding column weight_matrix
-        weight_matrix[: ,index] = weight_vector
-
+        weight_matrix[: ,index] = weight_vector[:]
 
     # end of algorithm
-    return weight_matrix
+    return weight_matrix[:,:]
 
 def scale(matrix):
     matrix_t = np.transpose(matrix)
@@ -93,9 +92,9 @@ def scale(matrix):
 
 def convert_data_to_matrix(file_name):
     with open(file_name, 'r') as data_file:
-        spam_file = list(csv.reader(data_file, delimiter = " "))
+        file = list(csv.reader(data_file, delimiter = " "))
 
-    data_matrix_full = np.array(spam_file[0:], dtype=np.float)
+    data_matrix_full = np.array(file[0:], dtype=np.float)
     return data_matrix_full
 
 def main():
