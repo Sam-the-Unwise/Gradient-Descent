@@ -215,58 +215,18 @@ def calculate_train_test_and_val_data(data_matrix_test, data_matrix_full, binary
     np.savetxt("plzwork.csv", weight_matrix, delimiter = " ")
     data_matrix_full = convert_data_to_matrix("spam.data")
 
-    temp_matrix = []
-    temp_full_matrix = []
-    for i in range(weight_matrix.shape[1] - 1):
-        temp_matrix.append(0)
-    
-    for j in range(train_data.shape[0] - 1):
-        temp_full_matrix.append([temp_matrix])
-
 
     # multiply weight_matrix with train_matrix and val_matrix
-    multi_train_data = np.array(temp_full_matrix)#np.zeros(weight_matrix.shape[1]*train_data.shape[0]))
-    multi_val_data = []
+    multi_train_data = np.array(np
+                                .zeros(weight_matrix.shape[1]*train_data.shape[0])
+                                .reshape(train_data.shape[0], weight_matrix.shape[1]))
+    multi_val_data = np.array(np
+                                .zeros(weight_matrix.shape[1]*val_data.shape[0])
+                                .reshape(val_data.shape[0], weight_matrix.shape[1]))
 
-    # variable to access the correct column of the weight matrix for multiplication
-    w_matrix_column = 0
-
-    # # loop through rows of train_matrix
-    # for row in train_data:
-    #     w_matrix_row = 0
-    #     dot_product_sum = 0
-
-    #     for number in row:
-    #         # get the element in the column of the weight matrix that is equal to this
-    #         #   matrices row
-    #         weight_matrix_multiplier = weight_matrix[w_matrix_row][w_matrix_column]
-
-    #         dot_product_sum += number * weight_matrix_multiplier
-
-    #     multi_train_data.append(dot_product_sum)
-
-    #     w_matrix_column += 1
-
-    #     # print(weight_matrix[w_matrix_row][row])
-
-    #     #loop through columns of train data
-    #         # multiply each item in corespondance with the item in weight matrix
-    #         # add all items together
-
-    #     # loop through columns of val data
-    #         # multiply each item in corespondance with the item in weight matrix
-    #         # add all items together
-    # print(multi_train_data)
-
+    # multiply matrices -- save in out = [matrix_name]
     np.matmul(train_data, weight_matrix, out = multi_train_data)
-    print(multi_train_data)
-    
-        
-
-    print(weight_matrix.shape)
-    print(train_data.shape)
-    print(val_data.shape)
-
+    np.matmul(val_data, weight_matrix, out = multi_val_data)
 
 
 
