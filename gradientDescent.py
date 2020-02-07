@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 from math import sqrt
+
 # Function: gradientDescent
 # INPUT ARGS:
 #   X : a matrix of numeric inputs {Obervations x Feature}
@@ -12,7 +13,7 @@ def gradientDescent(X, y, step_size, max_iterations):
 
     # VARIABLES
 
-    # tuple of array dim (row, col)
+    # tuple of array dimensions: (row, col)
     arr_dim = X.shape
 
     # num of input features
@@ -20,7 +21,7 @@ def gradientDescent(X, y, step_size, max_iterations):
 
     wm_total_entries = X_arr_col * max_iterations
 
-    # variable that initiates to the weight vector
+    # variable that initiates to the weight vector -- should start as zero vector
     weight_vector = np.zeros(X_arr_col)
 
     # matrix for real numbers
@@ -68,6 +69,10 @@ def gradientDescent(X, y, step_size, max_iterations):
     # end of algorithm
     return weight_matrix[:,:]
 
+# Function: scale
+# INPUT ARGS:
+#   matrix : the matrix that we need to scale
+# Return: [none]
 def scale(matrix):
     matrix_t = np.transpose(matrix)
     counter = 0
@@ -89,14 +94,22 @@ def scale(matrix):
         column -= mean
         column /= std
 
-
+# Function: convert_data_to_matrix
+# INPUT ARGS:
+#   file_name : the csv file that we will be pulling our matrix data from
+# Return: data_matrix_full
 def convert_data_to_matrix(file_name):
     with open(file_name, 'r') as data_file:
         file = list(csv.reader(data_file, delimiter = " "))
 
-    data_matrix_full = np.array(file[0:], dtype=np.float)
+    data_matrix_full = np.array(spam_file[0:], dtype=np.float)
+
     return data_matrix_full
 
+# Function: main
+# INPUT ARGS:
+#   [none]
+# Return: [none]
 def main():
     data_matrix_full = convert_data_to_matrix("spam.data")
 
@@ -114,7 +127,31 @@ def main():
 
     print(np.sum(weight_matrix))
 
+
+    # get 60-20-20 of data for train-validation-test
+
+    # go through and count items in matrix belonging to 0 and 1 groups
+    count_of_zeros = 0
+    count_of_ones = 0
+
+    for item in data_matrix_full:
+        if int(item[col_length - 1]) == 1:
+            count_of_ones += 1
+
+        if int(item[col_length - 1]) == 0:
+            count_of_zeros += 1
+
+    # print(count_of_zeros)
+    # print(count_of_ones)
+
+
+
+    # np.random.shuffle(data_matrix_test)
+
+    # apply gradient descent to matrix
+    learned_weight_matrix = gradientDescent(data_matrix_test, binary_vector, .05, 100)
+
     np.savetxt("plzwork.csv", weight_matrix, delimiter = " ")
 
+# call our main
 main()
-
