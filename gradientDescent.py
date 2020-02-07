@@ -15,6 +15,7 @@ def gradientDescent(X, y, step_size, max_iterations):
 
     # tuple of array dimensions: (row, col)
     arr_dim = X.shape
+    #print(arr_dim)
 
     # num of input features
     X_arr_col = arr_dim[1]
