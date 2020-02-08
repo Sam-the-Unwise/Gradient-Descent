@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 from math import sqrt
+import matplotlib.pyplot as plt
 
 # Function: gradientDescent
 # INPUT ARGS:
@@ -209,7 +210,7 @@ def calculate_train_test_and_val_data(data_matrix_test, data_matrix_full, binary
 
 
     # apply gradient descent to train data
-    weight_matrix = gradientDescent(train_data, train_binary_vector, .05, 500)
+    weight_matrix = gradientDescent(train_data, train_binary_vector, .5, 500)
 
     # save our weight matrix
     np.savetxt("plzwork.csv", weight_matrix, delimiter = " ")
@@ -228,6 +229,10 @@ def calculate_train_test_and_val_data(data_matrix_test, data_matrix_full, binary
     np.matmul(train_data, weight_matrix, out = multi_train_data)
     np.matmul(val_data, weight_matrix, out = multi_val_data)
 
+    plt.plot(multi_train_data, color='black', label='train')
+    plt.plot(multi_val_data, color='red', label='validation')
+    plt.xlabel('interations')
+    plt.show()
 
 
 # Function: main
