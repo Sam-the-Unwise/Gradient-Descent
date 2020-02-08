@@ -248,7 +248,7 @@ def main():
     # get necessary variables
     # shape yields tuple : (row, col)
     col_length = data_matrix_full.shape[1]
-
+    
     data_matrix_test = np.delete(data_matrix_full, col_length - 1, 1)
 
     binary_vector = data_matrix_full[:,57]
