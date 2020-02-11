@@ -1,3 +1,13 @@
+################################################################################
+#
+# AUTHOR(S): Josh Holguin
+#            Samantha Muellner
+#            Jacob Christiansen
+# DESCRIPTION: program that contains the code for the gradient descent algorithm
+# VERSION: 1.0.0v
+#
+################################################################################
+
 import numpy as np
 import csv
 from math import sqrt

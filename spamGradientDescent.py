@@ -1,3 +1,14 @@
+###############################################################################
+#
+# AUTHOR(S): Josh Holguin
+#            Samantha Muellner
+#            Jacob Christiansen
+# DESCRIPTION: program that will find and graph gradientDescent on the
+#       provided data set -- in this case spam.data
+# VERSION: 2.0.0v
+#
+###############################################################################
+
 import numpy as np
 import csv
 from math import sqrt
