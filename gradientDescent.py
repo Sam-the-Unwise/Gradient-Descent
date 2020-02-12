@@ -81,28 +81,3 @@ def gradientDescent(X, y, step_size, max_iterations):
 
     # end of algorithm
     return weight_matrix
-
-# Function: scale
-# INPUT ARGS:
-#   matrix : the matrix that we need to scale
-# Return: [none]
-def scale(matrix):
-    matrix_t = np.transpose(matrix)
-    counter = 0
-
-    for column in matrix_t:
-        counter += 1
-        col_sq_sum = 0
-
-        sum = np.sum(column)
-        shape = column.shape
-        col_size = shape[0]
-        mean = sum/col_size
-
-        for item in column:
-            col_sq_sum += ((item - mean)**2)
-
-        std = sqrt(col_sq_sum/col_size)
-
-        column -= mean
-        column /= std
