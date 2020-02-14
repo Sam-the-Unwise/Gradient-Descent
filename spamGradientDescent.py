@@ -261,7 +261,7 @@ def main():
     # print(training_loss_result_matrix)
     # print(validation_loss_result_matrix)
 
-    with open("LogLoss.csv", mode = 'w') as roc_file:
+    with open("SpamLogLoss.csv", mode = 'w') as roc_file:
         
         fieldnames = ['train loss', 'validation loss']
         writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
@@ -277,7 +277,6 @@ def main():
 
     # print(train_min_index)
     # print(train_min_value)
-
 
 
     #fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction)[:, validation_min_index]
