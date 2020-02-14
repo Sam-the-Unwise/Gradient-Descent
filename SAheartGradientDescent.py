@@ -130,7 +130,7 @@ def scale(matrix):
 #   file_name : the csv file that we will be pulling our matrix data from
 # Return: data_matrix_full
 def convert_data_to_matrix(file_name):
-    data_matrix_full = np.genfromtxt( file_name, delimiter = " " )
+    data_matrix_full = np.genfromtxt( file_name, delimiter = "," )
     return data_matrix_full
 
 
@@ -175,7 +175,7 @@ def main():
 
     data_matrix_test = np.delete(data_matrix_full, col_length - 1, 1)
 
-    binary_vector = data_matrix_full[:,57]
+    binary_vector = data_matrix_full[:,data_matrix_full.shape[1] - 1]
     # calculate train, test, and validation data
     #weight_matrix = calculate_train_test_and_val_data(data_matrix_test,
     #                                                data_matrix_full,
@@ -248,7 +248,7 @@ def main():
 
 
     # calculate loss
-    
+
     training_loss_result_matrix = []
     validation_loss_result_matrix = []
 
@@ -256,20 +256,20 @@ def main():
     for number in range(max_iterations):
         training_loss_result_matrix.append(sklearn.metrics.log_loss(y_train_vector, training_prediction[:, number]))
         validation_loss_result_matrix.append(sklearn.metrics.log_loss(y_validation_vector, validation_prediction[:, number]))
-    
-    
+
+
     # print(training_loss_result_matrix)
     # print(validation_loss_result_matrix)
 
     with open("SAheartLogLoss.csv", mode = 'w') as roc_file:
-        
+
         fieldnames = ['train loss', 'validation loss']
         writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
         writer.writeheader()
 
-        for index in range(max_iterations): 
-            writer.writerow({'train loss': training_loss_result_matrix[index], 
+        for index in range(max_iterations):
+            writer.writerow({'train loss': training_loss_result_matrix[index],
                             "validation loss": validation_loss_result_matrix[index]})
 
 
@@ -285,10 +285,10 @@ def main():
     #fpr, tpr, thresho= roc_curve(y_test, sig_v(np.dot(X_test, weightMatrix))[:, val_min_index])
     # log_roc.append((fpr_log, tpr_log))
 
-    
+
 
     # with open("ROC.csv", mode = 'w') as roc_file:
-        
+
     #     fieldnames = ['FPR', 'TPR']
     #     writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
@@ -296,8 +296,8 @@ def main():
 
     #     writer.writerow({'FPR': fpr, "TPR": tpr})
 
-    
-        
+
+
 
 # call our main
 main()

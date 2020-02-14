@@ -180,7 +180,13 @@ def main():
     # calculate train, test, and validation data
     #weight_matrix = calculate_train_test_and_val_data(data_matrix_test,
     #                                                data_matrix_full,
-    #                                                binary_vector)
+    #
+    count = 0
+    for item in data_matrix_full[:,col_length - 1]:
+
+        if item != 0 or item != 1:
+            np.delete(data_matrix_full, count, 0)
+        count += 1
 
     train, validation, test = split_matrix(data_matrix_full)
 
@@ -249,7 +255,7 @@ def main():
 
 
     # calculate loss
-    
+
     training_loss_result_matrix = []
     validation_loss_result_matrix = []
 
@@ -260,20 +266,20 @@ def main():
     for number in range(max_iterations):
         training_loss_result_matrix.append(sklearn.metrics.log_loss(y_train_vector, training_prediction[:, number]))
         validation_loss_result_matrix.append(sklearn.metrics.log_loss(y_validation_vector, validation_prediction[:, number]))
-    
-    
+
+
     # print(training_loss_result_matrix)
     # print(validation_loss_result_matrix)
 
     with open("zipLogLoss.csv", mode = 'w') as roc_file:
-        
+
         fieldnames = ['train loss', 'validation loss']
         writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
         writer.writeheader()
 
-        for index in range(max_iterations): 
-            writer.writerow({'train loss': training_loss_result_matrix[index], 
+        for index in range(max_iterations):
+            writer.writerow({'train loss': training_loss_result_matrix[index],
                             "validation loss": validation_loss_result_matrix[index]})
 
 
@@ -289,10 +295,10 @@ def main():
     #fpr, tpr, thresho= roc_curve(y_test, sig_v(np.dot(X_test, weightMatrix))[:, val_min_index])
     # log_roc.append((fpr_log, tpr_log))
 
-    
+
 
     # with open("ROC.csv", mode = 'w') as roc_file:
-        
+
     #     fieldnames = ['FPR', 'TPR']
     #     writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
@@ -300,8 +306,8 @@ def main():
 
     #     writer.writerow({'FPR': fpr, "TPR": tpr})
 
-    
-        
+
+
 
 # call our main
 main()
