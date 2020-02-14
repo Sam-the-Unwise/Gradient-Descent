@@ -205,17 +205,19 @@ def main():
     scale(X_train_data)
     scale(X_validation_data)
     scale(X_test_data)
-
-    # print out amount of 0s and 1s in each set
-    # print("                y")
-    # print("set              0     1")
-    # print("test           " + str(X_train_data.count(0)) + "  " + str(X_train_data.count(1)))
-    # print("train          " + str(validation_data.count(0)) + "  " + str(validation_data.count(1)))
-    # print("validation     " + str(test_data.count(0)) + "  " + str(test_data.count(1)))
-
+    
+    
     y_train_vector = train[0]
     y_validation_vector = validation[0]
     y_test_vector = test[0]
+
+    # print out amount of 0s and 1s in each set
+    print("                y")
+    print("set              0     1")
+    print("test            " + str(np.sum(y_test_vector == 0)) + "  " + str(np.sum(y_test_vector == 1)))
+    print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
+    print("train           " + str(np.sum(y_train_vector == 0)) + "  " + str(np.sum(y_train_vector == 1)))
+
 
     max_iterations = 1500
     step_size = .5
@@ -293,26 +295,22 @@ def main():
 
     ######################## CALCULATE ROC CURVE ########################
 
-    # print(train_min_index)
-    # print(train_min_value)
-
-
-    #fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction)[:, validation_min_index]
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction[:, validation_min_index])
 
     # calculate roc curves for logistic regression and baseline
     #fpr, tpr, thresho= roc_curve(y_test, sig_v(np.dot(X_test, weightMatrix))[:, val_min_index])
     # log_roc.append((fpr_log, tpr_log))
 
+    with open("zipROC.csv", mode = 'w') as roc_file:
 
+        fieldnames = ['FPR', 'TPR', 'Threshold']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
-    # with open("ROC.csv", mode = 'w') as roc_file:
+        writer.writeheader()
 
-    #     fieldnames = ['FPR', 'TPR']
-    #     writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+        for index in range(len(fpr)):
+            writer.writerow({'FPR': fpr[index], "TPR": tpr[index], 'Threshold': thresholds})
 
-    #     writer.writeheader()
-
-    #     writer.writerow({'FPR': fpr, "TPR": tpr})
 
 
 

@@ -30,7 +30,7 @@ def calculate_gradient(x_row, y_tild, step_size, weight_vector_transpose):
     denom = 1 + np.exp(inner_exp)
 
     numerator = np.multiply(x_row, y_tild)
-    
+
     # calculate gradient
     gradient = numerator/denom
 
@@ -77,7 +77,7 @@ def gradientDescent(X, y, step_size, max_iterations):
     for iteration in range(0, max_iterations):
 
         grad_log_losss = 0
-        
+
         for index in range(0, X.shape[1]):
             #calculate y_tid
             y_tild = -1
@@ -95,7 +95,7 @@ def gradientDescent(X, y, step_size, max_iterations):
 
             grad_log_losss += gradient
 
-        
+
         mean_grad_log_loss = grad_log_losss/X.shape[1]
 
         # update weight_vector depending on positive or negative
@@ -203,16 +203,16 @@ def main():
     scale(X_validation_data)
     scale(X_test_data)
 
-    # print out amount of 0s and 1s in each set
-    # print("                y")
-    # print("set              0     1")
-    # print("test           " + str(X_train_data.count(0)) + "  " + str(X_train_data.count(1)))
-    # print("train          " + str(validation_data.count(0)) + "  " + str(validation_data.count(1)))
-    # print("validation     " + str(test_data.count(0)) + "  " + str(test_data.count(1)))
-
     y_train_vector = train[:,train.shape[1] - 1]
     y_validation_vector = validation[:,train.shape[1] - 1]
     y_test_vector = test[:,train.shape[1] - 1]
+
+    # print out amount of 0s and 1s in each set
+    print("                y")
+    print("set              0     1")
+    print("test            " + str(np.sum(y_test_vector == 0)) + "  " + str(np.sum(y_test_vector == 1)))
+    print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
+    print("train           " + str(np.sum(y_train_vector == 0)) + "  " + str(np.sum(y_train_vector == 1)))
 
     max_iterations = 1500
     step_size = .5
@@ -265,44 +265,44 @@ def main():
 
 
 
-
     # print(training_loss_result_matrix)
     # print(validation_loss_result_matrix)
 
-    with open("SpamLogLoss.csv", mode = 'w') as roc_file:
+    # with open("SpamLogLoss.csv", mode = 'w') as roc_file:
 
-        fieldnames = ['train loss', 'validation loss']
-        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+    #     fieldnames = ['train loss', 'validation loss']
+    #     writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
-        writer.writeheader()
+    #     writer.writeheader()
 
-        for index in range(max_iterations):
-            writer.writerow({'train loss': training_loss_result_matrix[index],
-                           "validation loss": validation_loss_result_matrix[index]})
+    #     for index in range(max_iterations):
+    #         writer.writerow({'train loss': training_loss_result_matrix[index],
+    #                        "validation loss": validation_loss_result_matrix[index]})
+
+
 
 
     ######################## CALCULATE ROC CURVE ########################
 
-    # print(train_min_index)
-    # print(train_min_value)
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction[:, validation_min_index])
 
-
-    #fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction)[:, validation_min_index]
 
     # calculate roc curves for logistic regression and baseline
     #fpr, tpr, thresho= roc_curve(y_test, sig_v(np.dot(X_test, weightMatrix))[:, val_min_index])
     # log_roc.append((fpr_log, tpr_log))
 
+    with open("spamROC.csv", mode = 'w') as roc_file:
 
+        fieldnames = ['FPR', 'TPR', 'Threshold']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
-    # with open("ROC.csv", mode = 'w') as roc_file:
+        writer.writeheader()
 
-    #     fieldnames = ['FPR', 'TPR']
-    #     writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
-
-    #     writer.writeheader()
-
-    #     writer.writerow({'FPR': fpr, "TPR": tpr})
+        for index in range(len(fpr)):
+            curr_fpr = fpr[index]
+            curr_tpr = tpr[index]
+            curr_thresh = thresholds[index]
+            writer.writerow({'FPR': curr_fpr, "TPR": curr_tpr, 'Threshold': curr_thresh})
 
 
 
