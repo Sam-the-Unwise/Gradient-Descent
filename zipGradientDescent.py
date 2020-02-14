@@ -60,14 +60,23 @@ def gradientDescent(X, y, step_size, max_iterations):
     # matrix for real numbers
     #   row of #s = num of inputs
     #   num of cols = maxIterations
-    weight_matrix = np.array(np
-                        .zeros(wm_total_entries)
-                        .reshape(X_arr_col, max_iterations))
+    # weight_matrix = np.array(np
+    #                     .zeros(wm_total_entries)
+    #                     .reshape(X_arr_col, max_iterations))
+
+    array_of_zeros = []
+
+    for i in range(X_arr_col):
+        array_of_zeros.append(0)
+
+    weight_matrix = np.array(array_of_zeros)
 
     # ALGORITHM
     weight_vector_transpose = np.transpose(weight_vector)
 
     for iteration in range(0, max_iterations):
+
+        grad_log_losss = 0
         
         for index in range(0, X.shape[1]):
             #calculate y_tid
@@ -93,7 +102,12 @@ def gradientDescent(X, y, step_size, max_iterations):
         weight_vector -= np.multiply(step_size, mean_grad_log_loss)
 
         # store the resulting weight_vector in the corresponding column weight_matrix
-        weight_matrix[: ,index] = weight_vector
+        weight_matrix = np.vstack((weight_matrix, np.array(weight_vector)))
+
+    # get rid of initial zeros matrix that was added
+    weight_matrix = np.delete(weight_matrix, 0, 0)
+
+    weight_matrix = np.transpose(weight_matrix)
 
     # end of algorithm
     return weight_matrix
@@ -125,7 +139,6 @@ def scale(matrix):
         column /= std
 
 
-
 # Function: convert_data_to_matrix
 # INPUT ARGS:
 #   file_name : the csv file that we will be pulling our matrix data from
@@ -137,27 +150,22 @@ def convert_data_to_matrix(file_name):
 
 # Function: split matrix
 # INPUT ARGS:
-#   [none]
-# Return: [none]
+#   X : matrix to be split
+# Return: train, validation, test
 def split_matrix(X):
     train, validation, test = np.split( X, [int(.6 * len(X)), int(.8 * len(X))])
 
     return (train, validation, test)
 
 
-
+# Function: calculate_sigmoid
+# INPUT ARGS:
+#   y : current vector that needs to be calculated
+# Return: y_tilde_i
 def calculate_sigmoid(y):
     y_tilde_i = 1/(1 + np.exp(-y))
 
     return y_tilde_i
-
-
-
-def get_t_and_v_data(test_data, validation_data, pred):
-    test_output = np.matmul(test_data, pred)
-    validation_output = np.matmul(validation_data, pred)
-
-    return (test_output, validation_output)
 
 
 # Function: main
@@ -225,7 +233,7 @@ def main():
     # get dot product of matrixes
     training_prediction = np.dot(X_train_data, train_pred_matrix)
     validation_prediction = np.dot(X_validation_data, val_pred_matrix)
-    test_prediction = np.dot(X_test_data, -test_pred_matrix)
+    test_prediction = np.dot(X_test_data, test_pred_matrix)
 
     sigmoid_vector = np.vectorize(calculate_sigmoid)
 
