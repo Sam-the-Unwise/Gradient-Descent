@@ -14,6 +14,30 @@ import csv
 from math import sqrt
 import sklearn.metrics
 
+
+
+# Function: calculate_gradient
+# INPUT ARGS:
+#   matrix : input matrix row with obs and features
+#   y_tild : modified y val to calc gradient
+#   step_size : step fir gradient
+#
+# Return: [none]
+def calculate_gradient(x_row, y_tild, step_size, weight_vector_transpose):
+    # calculate elements of the denominator
+    verctor_mult = np.multiply(weight_vector_transpose, x_row)
+    inner_exp = np.multiply(y_tild, verctor_mult)
+    denom = 1 + np.exp(inner_exp)
+
+    numerator = np.multiply(x_row, y_tild)
+    
+    # calculate gradient
+    gradient = numerator/denom
+
+    return gradient
+
+
+
 # Function: gradientDescent
 # INPUT ARGS:
 #   X : a matrix of numeric inputs {Obervations x Feature}
@@ -22,8 +46,6 @@ import sklearn.metrics
 #   max_iterations : pos int that controls how many steps to take
 # Return: weight_matrix
 def gradientDescent(X, y, step_size, max_iterations):
-    # VARIABLES
-
     # tuple of array dim (row, col)
     arr_dim = X.shape
 
@@ -38,63 +60,57 @@ def gradientDescent(X, y, step_size, max_iterations):
     # matrix for real numbers
     #   row of #s = num of inputs
     #   num of cols = maxIterations
-    weight_matrix = np.array(np
-                        .zeros(wm_total_entries)
-                        .reshape(X_arr_col, max_iterations))
+    # weight_matrix = np.array(np
+    #                     .zeros(wm_total_entries)
+    #                     .reshape(X_arr_col, max_iterations))
+
+    array_of_zeros = []
+
+    for i in range(X_arr_col):
+        array_of_zeros.append(0)
+
+    weight_matrix = np.array(array_of_zeros)
 
     # ALGORITHM
     weight_vector_transpose = np.transpose(weight_vector)
 
     for iteration in range(0, max_iterations):
-        #calculate y_tid
+
+        grad_log_losss = 0
+        
         for index in range(0, X.shape[1]):
-
-            grad_log_losss = 0
-            verctor_mult = 0
-            inner_exp = 0
-
+            #calculate y_tid
             y_tild = -1
 
             if(y[index] == 1):
                 y_tild = 1
+
+
+            grad_log_losss = 0
+            verctor_mult = 0
+            inner_exp = 0
 
             # variables for simplification
             gradient = calculate_gradient(X[index,:], y_tild, step_size, weight_vector_transpose)
 
             grad_log_losss += gradient
 
+        
         mean_grad_log_loss = grad_log_losss/X.shape[1]
 
         # update weight_vector depending on positive or negative
         weight_vector -= np.multiply(step_size, mean_grad_log_loss)
 
         # store the resulting weight_vector in the corresponding column weight_matrix
-        weight_matrix[: ,index] = weight_vector
+        weight_matrix = np.vstack((weight_matrix, np.array(weight_vector)))
+
+    # get rid of initial zeros matrix that was added
+    weight_matrix = np.delete(weight_matrix, 0, 0)
+
+    weight_matrix = np.transpose(weight_matrix)
 
     # end of algorithm
     return weight_matrix
-
-
-
-# Function: calculate_gradient
-# INPUT ARGS:
-#   matrix : input matrix row with obs and features
-#   y_tild : modified y val to calc gradient
-#   step_size : step fir gradient
-#
-# Return: [none]
-def calculate_gradient(x_row, y_tild, step_size, weight_vector_transpose):
-    verctor_mult = np.multiply(weight_vector_transpose, x_row)
-    inner_exp = np.multiply(y_tild, verctor_mult)
-
-    numerator = np.multiply(x_row, y_tild)
-    denom = 1 + np.exp(inner_exp)
-    # calculate gradient
-
-    gradient = numerator/denom
-
-    return gradient
-
 
 
 
@@ -124,39 +140,34 @@ def scale(matrix):
         column /= std
 
 
-
 # Function: convert_data_to_matrix
 # INPUT ARGS:
 #   file_name : the csv file that we will be pulling our matrix data from
 # Return: data_matrix_full
 def convert_data_to_matrix(file_name):
     data_matrix_full = np.genfromtxt( file_name, delimiter = "," )
+
     return data_matrix_full
 
 
 # Function: split matrix
 # INPUT ARGS:
-#   [none]
-# Return: [none]
+#   X : matrix to be split
+# Return: train, validation, test
 def split_matrix(X):
     train, validation, test = np.split( X, [int(.6 * len(X)), int(.8 * len(X))])
 
     return (train, validation, test)
 
 
-
+# Function: calculate_sigmoid
+# INPUT ARGS:
+#   y : current vector that needs to be calculated
+# Return: y_tilde_i
 def calculate_sigmoid(y):
     y_tilde_i = 1/(1 + np.exp(-y))
 
     return y_tilde_i
-
-
-
-def get_t_and_v_data(test_data, validation_data, pred):
-    test_output = np.matmul(test_data, pred)
-    validation_output = np.matmul(validation_data, pred)
-
-    return (test_output, validation_output)
 
 
 # Function: main
@@ -184,12 +195,17 @@ def main():
     train, validation, test = split_matrix(data_matrix_full)
 
     X_train_data = np.delete(train, col_length - 1, 1)
-    X_validation_data = np.delete(validation, col_length - 1, 1)
-    X_test_data = np.delete(test, col_length - 1, 1)
+    X_train_data = np.array(X_train_data, dtype=np.float128)
 
-    scale(X_train_data)
-    scale(X_validation_data)
-    scale(X_test_data)
+    X_validation_data = np.delete(validation, col_length - 1, 1)
+    X_validation_data = np.array(X_validation_data, dtype=np.float128)
+
+    X_test_data = np.delete(test, col_length - 1, 1)
+    X_test_data = np.array(X_test_data, dtype=np.float128)
+
+    # scale(X_train_data)
+    # scale(X_validation_data)
+    # scale(X_test_data)
 
     # print out amount of 0s and 1s in each set
     # print("                y")
@@ -209,16 +225,17 @@ def main():
     val_pred_matrix = gradientDescent(X_validation_data, y_validation_vector, step_size, max_iterations)
     test_pred_matrix = gradientDescent(X_test_data, y_test_vector, step_size, max_iterations)
 
-    #test_data_output, validation_data_output = get_t_and_v_data(test_data, validation_data, pred_matrix)
-
-
 
     ######################## CALCULATE LOGISTIC REGRESSION ########################
 
     # get dot product of matrixes
     training_prediction = np.dot(X_train_data, train_pred_matrix)
     validation_prediction = np.dot(X_validation_data, val_pred_matrix)
-    test_prediction = np.dot(X_test_data, -test_pred_matrix)
+    test_prediction = np.dot(X_test_data, test_pred_matrix)
+
+    print(training_prediction)
+    print(validation_prediction)
+    print(test_prediction)
 
     sigmoid_vector = np.vectorize(calculate_sigmoid)
 
@@ -226,11 +243,6 @@ def main():
     training_prediction = sigmoid_vector(training_prediction)
     validation_prediction = sigmoid_vector(validation_prediction)
     test_prediction = sigmoid_vector(test_prediction)
-
-    # used to round numbers -- unsure if we need this but Jacob said fractions were a problem when graphing *shrugs*
-    training_prediction = np.around(training_prediction)
-    validation_prediction = np.around(validation_prediction)
-    test_prediction = np.around(test_prediction)
 
 
     # calculate minumum
