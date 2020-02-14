@@ -14,6 +14,30 @@ import csv
 from math import sqrt
 import sklearn.metrics
 
+
+
+# Function: calculate_gradient
+# INPUT ARGS:
+#   matrix : input matrix row with obs and features
+#   y_tild : modified y val to calc gradient
+#   step_size : step fir gradient
+#
+# Return: [none]
+def calculate_gradient(x_row, y_tild, step_size, weight_vector_transpose):
+    # calculate elements of the denominator
+    verctor_mult = np.multiply(weight_vector_transpose, x_row)
+    inner_exp = np.multiply(y_tild, verctor_mult)
+    denom = 1 + np.exp(inner_exp)
+
+    numerator = np.multiply(x_row, y_tild)
+    
+    # calculate gradient
+    gradient = numerator/denom
+
+    return gradient
+
+
+
 # Function: gradientDescent
 # INPUT ARGS:
 #   X : a matrix of numeric inputs {Obervations x Feature}
@@ -22,8 +46,6 @@ import sklearn.metrics
 #   max_iterations : pos int that controls how many steps to take
 # Return: weight_matrix
 def gradientDescent(X, y, step_size, max_iterations):
-    # VARIABLES
-
     # tuple of array dim (row, col)
     arr_dim = X.shape
 
@@ -46,23 +68,25 @@ def gradientDescent(X, y, step_size, max_iterations):
     weight_vector_transpose = np.transpose(weight_vector)
 
     for iteration in range(0, max_iterations):
-        #calculate y_tid
+        
         for index in range(0, X.shape[1]):
-
-            grad_log_losss = 0
-            verctor_mult = 0
-            inner_exp = 0
-
+            #calculate y_tid
             y_tild = -1
 
             if(y[index] == 1):
                 y_tild = 1
+
+
+            grad_log_losss = 0
+            verctor_mult = 0
+            inner_exp = 0
 
             # variables for simplification
             gradient = calculate_gradient(X[index,:], y_tild, step_size, weight_vector_transpose)
 
             grad_log_losss += gradient
 
+        
         mean_grad_log_loss = grad_log_losss/X.shape[1]
 
         # update weight_vector depending on positive or negative
@@ -73,29 +97,6 @@ def gradientDescent(X, y, step_size, max_iterations):
 
     # end of algorithm
     return weight_matrix
-
-
-
-# Function: calculate_gradient
-# INPUT ARGS:
-#   matrix : input matrix row with obs and features
-#   y_tild : modified y val to calc gradient
-#   step_size : step fir gradient
-#
-# Return: [none]
-def calculate_gradient(x_row, y_tild, step_size, weight_vector_transpose):
-    verctor_mult = np.multiply(weight_vector_transpose, x_row)
-    inner_exp = np.multiply(y_tild, verctor_mult)
-
-    numerator = np.multiply(x_row, y_tild)
-    denom = 1 + np.exp(inner_exp)
-    # calculate gradient
-
-    gradient = numerator/denom
-
-    return gradient
-
-
 
 
 # Function: scale
