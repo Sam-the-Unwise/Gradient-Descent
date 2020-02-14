@@ -13,6 +13,8 @@ import numpy as np
 import csv
 from math import sqrt
 import sklearn.metrics
+import sys
+import math
 
 
 
@@ -180,11 +182,23 @@ def main():
 
     np.random.shuffle(data_matrix_full)
 
+    # get rid of column that says absent and not-absent
+    data_matrix_full = np.delete(data_matrix_full, 5, 1)
+
     # get necessary variables
     # shape yields tuple : (row, col)
     col_length = data_matrix_full.shape[1]
 
     data_matrix_test = np.delete(data_matrix_full, col_length - 1, 1)
+
+    x = float('nan')
+
+    for item in data_matrix_test:
+        for value in item:
+            if(math.isnan(value)):
+                value = (np.where(data_matrix_test == item))
+                print(value)
+
 
     binary_vector = data_matrix_full[:,data_matrix_full.shape[1] - 1]
     # calculate train, test, and validation data
@@ -207,16 +221,17 @@ def main():
     # scale(X_validation_data)
     # scale(X_test_data)
 
-    # print out amount of 0s and 1s in each set
-    # print("                y")
-    # print("set              0     1")
-    # print("test           " + str(X_train_data.count(0)) + "  " + str(X_train_data.count(1)))
-    # print("train          " + str(validation_data.count(0)) + "  " + str(validation_data.count(1)))
-    # print("validation     " + str(test_data.count(0)) + "  " + str(test_data.count(1)))
-
     y_train_vector = train[:,train.shape[1] - 1]
     y_validation_vector = validation[:,train.shape[1] - 1]
     y_test_vector = test[:,train.shape[1] - 1]
+
+    # print out amount of 0s and 1s in each set
+    print("                y")
+    print("set              0     1")
+    print("test            " + str(np.sum(y_test_vector == 0)) + "  " + str(np.sum(y_test_vector == 1)))
+    print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
+    print("train           " + str(np.sum(y_train_vector == 0)) + "  " + str(np.sum(y_train_vector == 1)))
+
 
     max_iterations = 1500
     step_size = .5
@@ -225,6 +240,7 @@ def main():
     val_pred_matrix = gradientDescent(X_validation_data, y_validation_vector, step_size, max_iterations)
     test_pred_matrix = gradientDescent(X_test_data, y_test_vector, step_size, max_iterations)
 
+    np.set_printoptions(threshold=sys.maxsize)
 
     ######################## CALCULATE LOGISTIC REGRESSION ########################
 
@@ -232,10 +248,6 @@ def main():
     training_prediction = np.dot(X_train_data, train_pred_matrix)
     validation_prediction = np.dot(X_validation_data, val_pred_matrix)
     test_prediction = np.dot(X_test_data, test_pred_matrix)
-
-    print(training_prediction)
-    print(validation_prediction)
-    print(test_prediction)
 
     sigmoid_vector = np.vectorize(calculate_sigmoid)
 
@@ -287,29 +299,31 @@ def main():
 
     ######################## CALCULATE ROC CURVE ########################
 
-    # print(train_min_index)
-    # print(train_min_value)
-
-
-    #fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction)[:, validation_min_index]
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction[:, validation_min_index])
 
     # calculate roc curves for logistic regression and baseline
     #fpr, tpr, thresho= roc_curve(y_test, sig_v(np.dot(X_test, weightMatrix))[:, val_min_index])
     # log_roc.append((fpr_log, tpr_log))
 
+    with open("SAheartROC.csv", mode = 'w') as roc_file:
 
+        fieldnames = ['FPR', 'TPR', 'Threshold']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
-    # with open("ROC.csv", mode = 'w') as roc_file:
+        writer.writeheader()
 
-    #     fieldnames = ['FPR', 'TPR']
-    #     writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+        for index in range(len(fpr)):
+            writer.writerow({'FPR': fpr[index], "TPR": tpr[index], 'Threshold': thresholds})
 
-    #     writer.writeheader()
-
-    #     writer.writerow({'FPR': fpr, "TPR": tpr})
 
 
 
 
 # call our main
 main()
+
+# all_data = np.genfromtxt('SAheart.data', delimiter=",")
+# # get size of data
+# size = all_data.shape[1] - 1
+
+# print(all_data[:,5])
