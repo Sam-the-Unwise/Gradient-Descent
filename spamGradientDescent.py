@@ -5,7 +5,7 @@
 #            Jacob Christiansen
 # DESCRIPTION: program that will find and graph gradientDescent on the
 #       provided data set -- in this case spam.data
-# VERSION: 2.3.2v
+# VERSION: 3.2.0v
 #
 ###############################################################################
 
@@ -91,7 +91,10 @@ def gradientDescent(X, y, step_size, max_iterations):
             inner_exp = 0
 
             # variables for simplification
-            gradient = calculate_gradient(X[index,:], y_tild, step_size, weight_vector_transpose)
+            gradient = calculate_gradient(X[index,:], 
+                                            y_tild, 
+                                            step_size, 
+                                            weight_vector_transpose)
 
             grad_log_losss += gradient
 
@@ -101,8 +104,8 @@ def gradientDescent(X, y, step_size, max_iterations):
         # update weight_vector depending on positive or negative
         weight_vector -= np.multiply(step_size, mean_grad_log_loss)
 
-        # store the resulting weight_vector in the corresponding column weight_matrix
-        #weight_matrix[:, index] = weight_vector[:]
+        # store the resulting weight_vector in the corresponding 
+        #   column weight_matrix
         weight_matrix = np.vstack((weight_matrix, np.array(weight_vector)))
 
     # get rid of initial zeros matrix that was added
@@ -155,7 +158,8 @@ def convert_data_to_matrix(file_name):
 #   X : matrix to be split
 # Return: train, validation, test
 def split_matrix(X):
-    train, validation, test = np.split( X, [int(.6 * len(X)), int(.8 * len(X))])
+    train, validation, test = np.split( X, [int(.6 * len(X)), 
+                                            int(.8 * len(X))])
 
     return (train, validation, test)
 
@@ -168,6 +172,8 @@ def calculate_sigmoid(y):
     y_tilde_i = 1/(1 + np.exp(-y))
 
     return y_tilde_i
+
+
 
 
 # Function: main
@@ -211,9 +217,15 @@ def main():
     # print out amount of 0s and 1s in each set
     print("                y")
     print("set              0     1")
-    print("test            " + str(np.sum(y_test_vector == 0)) + "  " + str(np.sum(y_test_vector == 1)))
-    print("train           " + str(np.sum(y_train_vector == 0)) + "  " + str(np.sum(y_train_vector == 1)))
-    print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
+    print("test            " 
+            + str(np.sum(y_test_vector == 0)) 
+            + "  " + str(np.sum(y_test_vector == 1)))
+    print("train           " 
+            + str(np.sum(y_train_vector == 0)) 
+            + "  " + str(np.sum(y_train_vector == 1)))
+    print("val             " 
+            + str(np.sum(y_validation_vector == 0)) 
+            + "  " + str(np.sum(y_validation_vector == 1)))
 
 
 
@@ -221,14 +233,17 @@ def main():
     max_iterations = 1500
     step_size = .5
 
-    train_pred_matrix = gradientDescent(X_train_data, y_train_vector, step_size, max_iterations)
-    val_pred_matrix = gradientDescent(X_validation_data, y_validation_vector, step_size, max_iterations)
-    test_pred_matrix = gradientDescent(X_test_data, y_test_vector, step_size, max_iterations)
+    train_pred_matrix = gradientDescent(X_train_data, y_train_vector, 
+                                        step_size, max_iterations)
+    val_pred_matrix = gradientDescent(X_validation_data, y_validation_vector, 
+                                        step_size, max_iterations)
+    test_pred_matrix = gradientDescent(X_test_data, y_test_vector, step_size,
+                                        max_iterations)
 
 
 
 
-    ######################## CALCULATE LOGISTIC REGRESSION ########################
+    ###################### CALCULATE LOGISTIC REGRESSION ######################
 
     # get dot product of matrixes
     training_prediction = np.matmul(X_train_data, train_pred_matrix)
@@ -257,12 +272,11 @@ def main():
     validation_min_index, validation_min_value = min(enumerate(train_sum_matrix))
 
 
-    # calculate loss
-
+    # create loss validation matrices
     training_loss_result_matrix = []
     validation_loss_result_matrix = []
 
-    # create loss validation matrices
+    
     for number in range(max_iterations):
         # get log loss of training set
         training_log_loss = sklearn.metrics.log_loss(y_train_vector,
@@ -276,7 +290,7 @@ def main():
 
 
     # write to file so it can be graphed with R
-    with open("SpamLogLoss.csv", mode = 'w') as roc_file:
+    with open("spamLogLoss.csv", mode = 'w') as roc_file:
 
         fieldnames = ['train loss', 'validation loss']
         writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
@@ -290,10 +304,11 @@ def main():
 
 
 
-    ######################## CALCULATE ROC CURVE ########################
+    ########################### CALCULATE ROC CURVE ###########################
 
     # calculate roc curves for logistic regression and baseline
-    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction[:, validation_min_index])
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, 
+                                    test_prediction[:, validation_min_index])
 
     # write to file so it can be graphed with R
     with open("spamROC.csv", mode = 'w') as roc_file:
@@ -309,6 +324,33 @@ def main():
             curr_thresh = thresholds[index]
             writer.writerow({'FPR': curr_fpr, "TPR": curr_tpr, 'Threshold': curr_thresh})
 
+    ######################### CALCULATE PERCENT ERROR #########################
+    train_percent_error = []
+    validation_percent_error = []
+    test_percent_error = []
+
+    for num in range(max_iterations):
+        # compare prediction matrix with original vector to see if results are correct
+        train_mean = np.mean(training_prediction[:, num] != y_train_vector)
+        val_mean = np.mean(validation_prediction[:, num] != y_validation_vector)
+        test_mean = np.mean(test_prediction[:, num] != y_test_vector)
+
+        train_percent_error.append(train_mean)
+        validation_percent_error.append(val_mean)
+        test_percent_error.append(test_mean)
+
+    # write to file so it can be graphed with R
+    with open("spamPercentError.csv", mode = 'w') as roc_file:
+
+        fieldnames = ['test error', 'training error', 'validation error']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+
+        writer.writeheader()
+
+        for index in range(max_iterations):
+            writer.writerow({'test error': test_percent_error[index], 
+                            "training error": train_percent_error[index], 
+                            'validation error': validation_percent_error[index]})
 
 
 
