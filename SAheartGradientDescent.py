@@ -134,9 +134,11 @@ def scale(matrix):
             col_sq_sum += ((item - mean)**2)
 
         std = sqrt(col_sq_sum/col_size)
-
-        column -= mean
-        column /= std
+        if std == 0:
+            matrix = np.delete(matrix, counter)
+        else:
+            column -= mean
+            column /= std
 
 
 # Function: convert_data_to_matrix
