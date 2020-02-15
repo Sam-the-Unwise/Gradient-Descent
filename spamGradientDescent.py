@@ -199,6 +199,7 @@ def main():
     X_validation_data = np.delete(validation, col_length - 1, 1)
     X_test_data = np.delete(test, col_length - 1, 1)
 
+    # scale our data as needed
     scale(X_train_data)
     scale(X_validation_data)
     scale(X_test_data)
@@ -214,12 +215,18 @@ def main():
     print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
     print("train           " + str(np.sum(y_train_vector == 0)) + "  " + str(np.sum(y_train_vector == 1)))
 
+
+
+
     max_iterations = 1500
     step_size = .5
 
     train_pred_matrix = gradientDescent(X_train_data, y_train_vector, step_size, max_iterations)
     val_pred_matrix = gradientDescent(X_validation_data, y_validation_vector, step_size, max_iterations)
     test_pred_matrix = gradientDescent(X_test_data, y_test_vector, step_size, max_iterations)
+
+
+
 
     ######################## CALCULATE LOGISTIC REGRESSION ########################
 
@@ -236,18 +243,19 @@ def main():
     test_prediction = sigmoid_vector(test_prediction)
 
 
-    # calculate minumum
-    train_sum_matrix = []
-    validation_sum_matrix = []
+    # # for graphing log loss in python
+    # # calculate minumum
+    # train_sum_matrix = []
+    # validation_sum_matrix = []
 
-    for count in range(1, max_iterations):
-        mean = np.mean(y_train_vector != training_prediction[:, count-1])
+    # for count in range(1, max_iterations):
+    #     mean = np.mean(y_train_vector != training_prediction[:, count-1])
 
-        train_sum_matrix.append(mean)
+    #     train_sum_matrix.append(mean)
 
-    # must use enumerate otherwise get the error ""'numpy.float64' object is not iterable"
-    train_min_index, train_min_value = min(enumerate(train_sum_matrix))
-    validation_min_index, validation_min_value = min(enumerate(train_sum_matrix))
+    # # must use enumerate otherwise get the error ""'numpy.float64' object is not iterable"
+    # train_min_index, train_min_value = min(enumerate(train_sum_matrix))
+    # validation_min_index, validation_min_value = min(enumerate(train_sum_matrix))
 
 
     # calculate loss
@@ -257,40 +265,38 @@ def main():
 
     # create loss validation matrices
     for number in range(max_iterations):
-        training_log_loss = sklearn.metrics.log_loss(y_train_vector, training_prediction[:, number])
+        # get log loss of training set
+        training_log_loss = sklearn.metrics.log_loss(y_train_vector, 
+                                            training_prediction[:, number])
         training_loss_result_matrix.append(training_log_loss)
 
-        validation_log_loss = sklearn.metrics.log_loss(y_validation_vector, validation_prediction[:, number])
+        # get log loss of validation set
+        validation_log_loss = sklearn.metrics.log_loss(y_validation_vector, 
+                                            validation_prediction[:, number])
         validation_loss_result_matrix.append(validation_log_loss)
 
 
+    # write to file so it can be graphed with R
+    with open("SpamLogLoss.csv", mode = 'w') as roc_file:
 
-    # print(training_loss_result_matrix)
-    # print(validation_loss_result_matrix)
+        fieldnames = ['train loss', 'validation loss']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
-    # with open("SpamLogLoss.csv", mode = 'w') as roc_file:
+        writer.writeheader()
 
-    #     fieldnames = ['train loss', 'validation loss']
-    #     writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
-
-    #     writer.writeheader()
-
-    #     for index in range(max_iterations):
-    #         writer.writerow({'train loss': training_loss_result_matrix[index],
-    #                        "validation loss": validation_loss_result_matrix[index]})
+        for index in range(max_iterations):
+            writer.writerow({'train loss': training_loss_result_matrix[index],
+                           "validation loss": validation_loss_result_matrix[index]})
 
 
 
 
     ######################## CALCULATE ROC CURVE ########################
 
+    # calculate roc curves for logistic regression and baseline
     fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction[:, validation_min_index])
 
-
-    # calculate roc curves for logistic regression and baseline
-    #fpr, tpr, thresho= roc_curve(y_test, sig_v(np.dot(X_test, weightMatrix))[:, val_min_index])
-    # log_roc.append((fpr_log, tpr_log))
-
+    # write to file so it can be graphed with R
     with open("spamROC.csv", mode = 'w') as roc_file:
 
         fieldnames = ['FPR', 'TPR', 'Threshold']
