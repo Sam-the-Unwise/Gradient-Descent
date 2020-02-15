@@ -187,7 +187,7 @@ def main():
     data_matrix_test = np.delete(data_matrix_full, col_length - 1, 1)
 
 
-    binary_vector = data_matrix_full[:,57]
+    binary_vector = data_matrix_full[:,col_length-1]
     # calculate train, test, and validation data
     #weight_matrix = calculate_train_test_and_val_data(data_matrix_test,
     #                                                data_matrix_full,
@@ -265,12 +265,12 @@ def main():
     # create loss validation matrices
     for number in range(max_iterations):
         # get log loss of training set
-        training_log_loss = sklearn.metrics.log_loss(y_train_vector, 
+        training_log_loss = sklearn.metrics.log_loss(y_train_vector,
                                             training_prediction[:, number])
         training_loss_result_matrix.append(training_log_loss)
 
         # get log loss of validation set
-        validation_log_loss = sklearn.metrics.log_loss(y_validation_vector, 
+        validation_log_loss = sklearn.metrics.log_loss(y_validation_vector,
                                             validation_prediction[:, number])
         validation_loss_result_matrix.append(validation_log_loss)
 

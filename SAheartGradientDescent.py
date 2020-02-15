@@ -32,7 +32,7 @@ def calculate_gradient(x_row, y_tild, step_size, weight_vector_transpose):
     denom = 1 + np.exp(inner_exp)
 
     numerator = np.multiply(x_row, y_tild)
-    
+
     # calculate gradient
     gradient = numerator/denom
 
@@ -79,7 +79,7 @@ def gradientDescent(X, y, step_size, max_iterations):
     for iteration in range(0, max_iterations):
 
         grad_log_losss = 0
-        
+
         for index in range(0, X.shape[1]):
             #calculate y_tid
             y_tild = -1
@@ -97,7 +97,7 @@ def gradientDescent(X, y, step_size, max_iterations):
 
             grad_log_losss += gradient
 
-        
+
         mean_grad_log_loss = grad_log_losss/X.shape[1]
 
         # update weight_vector depending on positive or negative
@@ -200,7 +200,7 @@ def main():
                 print(value)
 
 
-    binary_vector = data_matrix_full[:,data_matrix_full.shape[1] - 1]
+    binary_vector = data_matrix_full[:,col_length - 1]
     # calculate train, test, and validation data
     #weight_matrix = calculate_train_test_and_val_data(data_matrix_test,
     #                                                data_matrix_full,
