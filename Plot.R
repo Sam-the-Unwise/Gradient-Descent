@@ -1,6 +1,6 @@
 
 # read in CSV of information
-csvData <- read.csv2("/home/jacob/Documents/Cs_499/GradientDescent/SpamLogLoss.csv", header=TRUE, sep=",", dec=".")
+csvData <- read.csv2("zipLogLoss.csv", header=TRUE, sep=",", dec=".")
 
 # break up CSV for easier readability
 numOfObservations <- length(csvData$train.loss)
