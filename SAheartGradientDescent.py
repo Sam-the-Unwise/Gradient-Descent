@@ -324,11 +324,11 @@ def main():
     #           ""'numpy.float64' object is not iterable"
     val_min_index, val_min_value = min(enumerate(train_sum_matrix))
 
-
+    # calculate roc curves for logistic regression and baseline
     fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, 
                                     test_prediction[:, val_min_index])
 
-    # calculate roc curves for logistic regression and baseline
+    
     with open("SAheartROC.csv", mode = 'w') as roc_file:
 
         fieldnames = ['FPR', 'TPR', 'Threshold']
