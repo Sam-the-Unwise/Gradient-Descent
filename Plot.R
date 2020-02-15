@@ -1,6 +1,6 @@
 
 # read in CSV of information
-csvData <- read.csv2("/home/jacob/Documents/Cs_499/GradientDescent/SpamLogLoss.csv", header=TRUE, sep=",", dec=".")
+csvData <- read.csv2("SAheartLogLoss.csv", header=TRUE, sep=",", dec=".")
 
 # break up CSV for easier readability
 numOfObservations <- length(csvData$train.loss)
@@ -10,7 +10,7 @@ valLoss <- csvData$validation.loss
 
 min <- min(valLoss)
 minIndex <- match(min,valLoss)
-  
+
 # plot validation vs train
 tittle <- paste("Spam data, Training set Vs. Validation set, loss function over number of observations, N = ", numOfObservations)
 plot(x=inSeq, y=trainLoss, type="l", main=tittle, ylab="loss function", xlab="number of observations", col="red")
