@@ -243,19 +243,18 @@ def main():
     test_prediction = sigmoid_vector(test_prediction)
 
 
-    # # for graphing log loss in python
-    # # calculate minumum
-    # train_sum_matrix = []
-    # validation_sum_matrix = []
+    # calculate minumum
+    train_sum_matrix = []
+    validation_sum_matrix = []
 
-    # for count in range(1, max_iterations):
-    #     mean = np.mean(y_train_vector != training_prediction[:, count-1])
+    for count in range(1, max_iterations):
+        mean = np.mean(y_train_vector != training_prediction[:, count-1])
 
-    #     train_sum_matrix.append(mean)
+        train_sum_matrix.append(mean)
 
-    # # must use enumerate otherwise get the error ""'numpy.float64' object is not iterable"
-    # train_min_index, train_min_value = min(enumerate(train_sum_matrix))
-    # validation_min_index, validation_min_value = min(enumerate(train_sum_matrix))
+    # must use enumerate otherwise get the error ""'numpy.float64' object is not iterable"
+    train_min_index, train_min_value = min(enumerate(train_sum_matrix))
+    validation_min_index, validation_min_value = min(enumerate(train_sum_matrix))
 
 
     # calculate loss
