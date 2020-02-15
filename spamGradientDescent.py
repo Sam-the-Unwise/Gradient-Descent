@@ -5,14 +5,38 @@
 #            Jacob Christiansen
 # DESCRIPTION: program that will find and graph gradientDescent on the
 #       provided data set -- in this case spam.data
-# VERSION: 2.0.0v
+# VERSION: 3.2.0v
 #
 ###############################################################################
 
 import numpy as np
 import csv
 from math import sqrt
-import matplotlib.pyplot as plt
+import sklearn.metrics
+
+
+
+# Function: calculate_gradient
+# INPUT ARGS:
+#   matrix : input matrix row with obs and features
+#   y_tild : modified y val to calc gradient
+#   step_size : step fir gradient
+#
+# Return: [none]
+def calculate_gradient(x_row, y_tild, step_size, weight_vector_transpose):
+    # calculate elements of the denominator
+    verctor_mult = np.multiply(weight_vector_transpose, x_row)
+    inner_exp = np.multiply(y_tild, verctor_mult)
+    denom = 1 + np.exp(inner_exp)
+
+    numerator = np.multiply(x_row, y_tild)
+
+    # calculate gradient
+    gradient = numerator/denom
+
+    return gradient
+
+
 
 # Function: gradientDescent
 # INPUT ARGS:
@@ -22,12 +46,8 @@ import matplotlib.pyplot as plt
 #   max_iterations : pos int that controls how many steps to take
 # Return: weight_matrix
 def gradientDescent(X, y, step_size, max_iterations):
-
-    # VARIABLES
-
     # tuple of array dim (row, col)
     arr_dim = X.shape
-    #print(arr_dim)
 
     # num of input features
     X_arr_col = arr_dim[1]
@@ -40,48 +60,62 @@ def gradientDescent(X, y, step_size, max_iterations):
     # matrix for real numbers
     #   row of #s = num of inputs
     #   num of cols = maxIterations
-    weight_matrix = np.array(np
-                        .zeros(wm_total_entries)
-                        .reshape(X_arr_col, max_iterations))
+    # weight_matrix = np.array(np
+    #                     .zeros(wm_total_entries)
+    #                     .reshape(X_arr_col, max_iterations))
+
+    array_of_zeros = []
+
+    for i in range(X_arr_col):
+        array_of_zeros.append(0)
+
+    weight_matrix = np.array(array_of_zeros)
 
     # ALGORITHM
     weight_vector_transpose = np.transpose(weight_vector)
 
     for iteration in range(0, max_iterations):
-        #calculate y_tid
+
+        grad_log_losss = 0
+
         for index in range(0, X.shape[1]):
-
-            grad_log_losss = 0
-            verctor_mult = 0
-            inner_exp = 0
-
+            #calculate y_tid
             y_tild = -1
 
             if(y[index] == 1):
                 y_tild = 1
 
-            # variables for simplification
-            verctor_mult = np.multiply(weight_vector_transpose, X[index,:])
-            inner_exp = np.multiply(y_tild, verctor_mult)
-            # calculate gradient
 
-            gradient = (1/(1+np.exp(inner_exp))*
-                        (np.exp(inner_exp))*
-                        ((-y_tild)*X[index,:]))
+            grad_log_losss = 0
+            verctor_mult = 0
+            inner_exp = 0
+
+            # variables for simplification
+            gradient = calculate_gradient(X[index,:], 
+                                            y_tild, 
+                                            step_size, 
+                                            weight_vector_transpose)
 
             grad_log_losss += gradient
+
 
         mean_grad_log_loss = grad_log_losss/X.shape[1]
 
         # update weight_vector depending on positive or negative
-        weight_vector = weight_vector - np.multiply(step_size, mean_grad_log_loss)
+        weight_vector -= np.multiply(step_size, mean_grad_log_loss)
 
-        # store the resulting weight_vector in the corresponding column weight_matrix
-        weight_matrix[: ,index] = weight_vector
+        # store the resulting weight_vector in the corresponding 
+        #   column weight_matrix
+        weight_matrix = np.vstack((weight_matrix, np.array(weight_vector)))
 
+    # get rid of initial zeros matrix that was added
+    weight_matrix = np.delete(weight_matrix, 0, 0)
+
+    weight_matrix = np.transpose(weight_matrix)
 
     # end of algorithm
     return weight_matrix
+
 
 # Function: scale
 # INPUT ARGS:
@@ -108,142 +142,38 @@ def scale(matrix):
         column -= mean
         column /= std
 
+
+
 # Function: convert_data_to_matrix
 # INPUT ARGS:
 #   file_name : the csv file that we will be pulling our matrix data from
 # Return: data_matrix_full
 def convert_data_to_matrix(file_name):
-    with open(file_name, 'r') as data_file:
-        spam_file = list(csv.reader(data_file, delimiter = " "))
-
-    data_matrix_full = np.array(spam_file[0:], dtype=np.float)
+    data_matrix_full = np.genfromtxt( file_name, delimiter = " " )
     return data_matrix_full
 
 
-
-# Function: calculate_train_test_and_val_data
+# Function: split matrix
 # INPUT ARGS:
-#   data_matrix_test : modified data matrix (lacking last row of 1s and 0s)
-#   data_matrix_full : original data matrix
-#   binary_vector : vector containing the list of 1s and 0s in correspondance to
-#       data_matrix_test (obtained from data_matrix_full)
-# Return: [none]
-def calculate_train_test_and_val_data(data_matrix_test, data_matrix_full, binary_vector):
-    # get 60-20-20 of data for train-validation-test
+#   X : matrix to be split
+# Return: train, validation, test
+def split_matrix(X):
+    train, validation, test = np.split( X, [int(.6 * len(X)), 
+                                            int(.8 * len(X))])
 
-    row_length = data_matrix_full.shape[0]
-    col_length = data_matrix_full.shape[1]
-
-    # divide num of zero items into 60-20-20
-    train_data_count = int(row_length * .6)
-    val_data_count = int(row_length * .2)
-    test_data_count = int(row_length * .2)
-    
-    # create zero-arrays to initialize the numpy array for each set
-    #   allows us to add the arrays from the data_matrix_full since they will now
-    #   be the same size
-    array_of_zeros = []
-
-    for i in range(col_length - 1):
-        array_of_zeros.append(0)
-
-    train_data = np.array(array_of_zeros)
-    val_data = np.array(array_of_zeros)
-    test_data = np.array(array_of_zeros)
-    
-    # NOTE: to do this, we must assume that the data_matrix_test is still in the same order as the binary_vector#
-
-    # create index count that will keep track of the index we're at in the data_matrix_test and binary_vector
-    index_count = 0
-
-    # create count that will count the total number of zero-data we've added
-    zero_test_data_count = 0
-    zero_train_data_count = 0
-    zero_val_data_count = 0
-    one_test_data_count = 0
-    one_train_data_count = 0
-    one_val_data_count = 0
-
-    train_binary_vector = []
-    test_binary_vector = []
-    val_binary_vector = []
-
-    # loop through matrix and assign certain items to different matrixes
-    #       assign 60 to train, 20 to val, and 20 to test for both 0s and 1s
-    for data_list in data_matrix_test:
-
-        # append the first 60% of data to the zero_train_data
-        if index_count < train_data_count:
-            train_data = np.vstack((train_data, np.array(data_list)))
-
-            if int(binary_vector[index_count]) is 0:
-                zero_train_data_count += 1
-            else:
-                one_train_data_count += 1
-
-            train_binary_vector.append(binary_vector[index_count])
-
-        # append the next 20% of data to the zero_val_data
-        elif index_count < (train_data_count + val_data_count):
-            val_data = np.vstack((val_data, np.array(data_list)))
-
-            if int(binary_vector[index_count]) is 0:
-                zero_val_data_count += 1
-            else:
-                one_val_data_count += 1
-
-            val_binary_vector.append(binary_vector[index_count])
-            
-        # append the last 20% of data to the zero_test_data
-        elif index_count < (train_data_count + val_data_count + test_data_count):
-            test_data = np.vstack((test_data, np.array(data_list)))
-
-            if int(binary_vector[index_count]) is 0:
-                zero_test_data_count += 1
-            else:
-                one_test_data_count += 1
-
-            test_binary_vector.append(binary_vector[index_count])
-
-        index_count += 1
-
-    # get ride of added array of 0s we made when initializing array
-    train_data = np.delete(train_data, 0, 0)
-    val_data = np.delete(val_data, 0, 0)
-    test_data = np.delete(test_data, 0, 0)
-
-    # print out amount of 0s and 1s in each set
-    print("                y")
-    print("set              0     1")
-    print("test           " + str(zero_test_data_count) + "  " + str(one_test_data_count))
-    print("train          " + str(zero_train_data_count) + "  " + str(one_train_data_count))
-    print("validation     " + str(zero_val_data_count) + "  " + str(one_val_data_count))
+    return (train, validation, test)
 
 
-    # apply gradient descent to train data
-    weight_matrix = gradientDescent(train_data, train_binary_vector, .5, 500)
+# Function: calculate_sigmoid
+# INPUT ARGS:
+#   y : current vector that needs to be calculated
+# Return: y_tilde_i
+def calculate_sigmoid(y):
+    y_tilde_i = 1/(1 + np.exp(-y))
 
-    # save our weight matrix
-    np.savetxt("plzwork.csv", weight_matrix, delimiter = " ")
-    data_matrix_full = convert_data_to_matrix("spam.data")
+    return y_tilde_i
 
 
-    # multiply weight_matrix with train_matrix and val_matrix
-    multi_train_data = np.array(np
-                                .zeros(weight_matrix.shape[1]*train_data.shape[0])
-                                .reshape(train_data.shape[0], weight_matrix.shape[1]))
-    multi_val_data = np.array(np
-                                .zeros(weight_matrix.shape[1]*val_data.shape[0])
-                                .reshape(val_data.shape[0], weight_matrix.shape[1]))
-
-    # multiply matrices -- save in out = [matrix_name]
-    np.matmul(train_data, weight_matrix, out = multi_train_data)
-    np.matmul(val_data, weight_matrix, out = multi_val_data)
-
-    plt.plot(multi_train_data, color='black', label='train')
-    plt.plot(multi_val_data, color='red', label='validation')
-    plt.xlabel('interations')
-    plt.show()
 
 
 # Function: main
@@ -253,23 +183,183 @@ def calculate_train_test_and_val_data(data_matrix_test, data_matrix_full, binary
 def main():
     # get the data from our CSV file
     data_matrix_full = convert_data_to_matrix("spam.data")
-
     np.random.shuffle(data_matrix_full)
+
 
     # get necessary variables
     # shape yields tuple : (row, col)
     col_length = data_matrix_full.shape[1]
-    
+
     data_matrix_test = np.delete(data_matrix_full, col_length - 1, 1)
 
-    binary_vector = data_matrix_full[:,57]
 
-    scale(data_matrix_test)
-
+    binary_vector = data_matrix_full[:,col_length-1]
     # calculate train, test, and validation data
-    weight_matrix = calculate_train_test_and_val_data(data_matrix_test, 
-                                                    data_matrix_full, 
-                                                    binary_vector)
+    #weight_matrix = calculate_train_test_and_val_data(data_matrix_test,
+    #                                                data_matrix_full,
+    #                                                binary_vector)
+
+    train, validation, test = split_matrix(data_matrix_full)
+
+    X_train_data = np.delete(train, col_length - 1, 1)
+    X_validation_data = np.delete(validation, col_length - 1, 1)
+    X_test_data = np.delete(test, col_length - 1, 1)
+
+    # scale our data as needed
+    scale(X_train_data)
+    scale(X_validation_data)
+    scale(X_test_data)
+
+    y_train_vector = train[:,train.shape[1] - 1]
+    y_validation_vector = validation[:,train.shape[1] - 1]
+    y_test_vector = test[:,train.shape[1] - 1]
+
+    # print out amount of 0s and 1s in each set
+    print("                y")
+
+    print("set              0     1")
+
+    print("test            " 
+            + str(np.sum(y_test_vector == 0)) 
+            + "  " + str(np.sum(y_test_vector == 1)))
+    
+    print("train           " 
+            + str(np.sum(y_train_vector == 0)) 
+            + "  " + str(np.sum(y_train_vector == 1)))
+    
+    print("val             " 
+            + str(np.sum(y_validation_vector == 0)) 
+            + "  " + str(np.sum(y_validation_vector == 1)))
+
+
+
+
+    max_iterations = 1500
+    step_size = .5
+
+    train_pred_matrix = gradientDescent(X_train_data, 
+                                        y_train_vector, 
+                                        step_size, 
+                                        max_iterations)
+
+    val_pred_matrix = gradientDescent(X_validation_data, 
+                                        y_validation_vector, 
+                                        step_size, 
+                                        max_iterations)
+
+    test_pred_matrix = gradientDescent(X_test_data, 
+                                        y_test_vector, 
+                                        step_size, 
+                                        max_iterations)
+
+
+
+
+    ###################### CALCULATE LOGISTIC REGRESSION ######################
+
+    # get dot product of matrixes
+    training_prediction = np.matmul(X_train_data, train_pred_matrix)
+    validation_prediction = np.matmul(X_validation_data, val_pred_matrix)
+    test_prediction = np.matmul(X_test_data, test_pred_matrix)
+
+    sigmoid_vector = np.vectorize(calculate_sigmoid)
+
+    # used to set numbers above 0 to 1 and below 0 to -1
+    training_prediction = sigmoid_vector(training_prediction)
+    validation_prediction = sigmoid_vector(validation_prediction)
+    test_prediction = sigmoid_vector(test_prediction)
+
+
+    # calculate minumum
+    train_sum_matrix = []
+    validation_sum_matrix = []
+
+    for count in range(1, max_iterations):
+        mean = np.mean(y_train_vector != training_prediction[:, count-1])
+
+        train_sum_matrix.append(mean)
+
+    # must use enumerate otherwise get the error 
+    #       ""'numpy.float64' object is not iterable"
+    val_min_index, val_min_value = min(enumerate(train_sum_matrix))
+
+
+    # create loss validation matrices
+    training_loss_result_matrix = []
+    validation_loss_result_matrix = []
+
+    for number in range(max_iterations):
+        train_log_loss = sklearn.metrics.log_loss(y_train_vector, 
+                                                training_prediction[:, number])
+        val_log_loss = sklearn.metrics.log_loss(y_validation_vector, 
+                                                validation_prediction[:, number])
+
+        training_loss_result_matrix.append(train_log_loss)
+        validation_loss_result_matrix.append(val_log_loss)
+
+
+    # write to file so it can be graphed with R
+    with open("spamLogLoss.csv", mode = 'w') as roc_file:
+
+        fieldnames = ['train loss', 'validation loss']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+
+        writer.writeheader()
+
+        for index in range(max_iterations):
+            writer.writerow({'train loss': training_loss_result_matrix[index],
+                    "validation loss": validation_loss_result_matrix[index]})
+
+
+
+
+    ########################### CALCULATE ROC CURVE ###########################
+
+    # calculate roc curves for logistic regression and baseline
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, 
+                                    test_prediction[:, val_min_index])
+
+    # write to file so it can be graphed with R
+    with open("spamROC.csv", mode = 'w') as roc_file:
+
+        fieldnames = ['FPR', 'TPR', 'Threshold']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+
+        writer.writeheader()
+
+        for index in range(len(fpr)):
+            curr_fpr = fpr[index]
+            curr_tpr = tpr[index]
+            curr_thresh = thresholds[index]
+            writer.writerow({'FPR': curr_fpr, "TPR": curr_tpr, 'Threshold': curr_thresh})
+
+    ######################### CALCULATE PERCENT ERROR #########################
+    train_percent_error = []
+    validation_percent_error = []
+    test_percent_error = []
+
+    for num in range(max_iterations):
+        # compare prediction matrix with original vector to see if results are correct
+        train_mean = np.mean(training_prediction[:, num] != y_train_vector)
+        val_mean = np.mean(validation_prediction[:, num] != y_validation_vector)
+        test_mean = np.mean(test_prediction[:, num] != y_test_vector)
+
+        train_percent_error.append(train_mean)
+        validation_percent_error.append(val_mean)
+        test_percent_error.append(test_mean)
+
+    # write to file so it can be graphed with R
+    with open("spamPercentError.csv", mode = 'w') as roc_file:
+
+        fieldnames = ['test error', 'training error', 'validation error']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+
+        writer.writeheader()
+
+        for index in range(max_iterations):
+            writer.writerow({'test error': test_percent_error[index], 
+                            "training error": train_percent_error[index], 
+                            'validation error': validation_percent_error[index]})
 
 
 
