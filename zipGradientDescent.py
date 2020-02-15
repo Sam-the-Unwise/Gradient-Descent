@@ -12,8 +12,8 @@
 import numpy as np
 import csv
 from math import sqrt
+import math
 import sklearn.metrics
-
 
 
 # Function: calculate_gradient
@@ -56,13 +56,6 @@ def gradientDescent(X, y, step_size, max_iterations):
 
     # variable that initiates to the weight vector
     weight_vector = np.zeros(X_arr_col)
-
-    # matrix for real numbers
-    #   row of #s = num of inputs
-    #   num of cols = maxIterations
-    # weight_matrix = np.array(np
-    #                     .zeros(wm_total_entries)
-    #                     .reshape(X_arr_col, max_iterations))
 
     array_of_zeros = []
 
@@ -153,7 +146,10 @@ def convert_data_to_matrix(file_name):
 #   X : matrix to be split
 # Return: train, validation, test
 def split_matrix(X):
-    train, validation, test = np.split( X, [int(.6 * len(X)), int(.8 * len(X))])
+    train_split = int(.6 * len(X))
+    val_split =  int(.8 * len(X))
+
+    train, validation, test = np.split( X, [train_split, val_split])
 
     return (train, validation, test)
 
@@ -205,8 +201,6 @@ def main():
     col_length = data_matrix_full.shape[1]
 
     data_matrix_test = np.delete(data_matrix_full, 0, 1)
-
-
     binary_vector = data_matrix_full[:,57]
 
     train, validation, test = split_matrix(data_matrix_full)
@@ -219,16 +213,16 @@ def main():
     scale(X_validation_data)
     scale(X_test_data)
     
-    y_train_vector = np.array(train[0]).astype(int)
-    y_validation_vector = np.array(validation[0]).astype(int)
-    y_test_vector = np.array(test[0]).astype(int)
+    y_train_vector = np.array(train[:,0]).astype(int)
+    y_validation_vector = np.array(validation[:,0]).astype(int)
+    y_test_vector = np.array(test[:,0]).astype(int)
 
     # print out amount of 0s and 1s in each set
     print("                y")
     print("set              0     1")
     print("test            " + str(np.sum(y_test_vector == 0)) + "  " + str(np.sum(y_test_vector == 1)))
-    print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
     print("train           " + str(np.sum(y_train_vector == 0)) + "  " + str(np.sum(y_train_vector == 1)))
+    print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
 
 
     max_iterations = 1500
@@ -240,88 +234,64 @@ def main():
 
 
 
-    # ######################## CALCULATE LOGISTIC REGRESSION ########################
-
-    # # get dot product of matrixes
-    # training_prediction = np.dot(X_train_data, train_pred_matrix)
-    # validation_prediction = np.dot(X_validation_data, val_pred_matrix)
-    # test_prediction = np.dot(X_test_data, test_pred_matrix)
-
-    # sigmoid_vector = np.vectorize(calculate_sigmoid)
-
-    # # used to set numbers above 0 to 1 and below 0 to -1
-    # training_prediction = sigmoid_vector(training_prediction)
-    # validation_prediction = sigmoid_vector(validation_prediction)
-    # test_prediction = sigmoid_vector(test_prediction)
-
-    # # used to round numbers -- unsure if we need this but Jacob said fractions were a problem when graphing *shrugs*
-    # training_prediction = np.around(training_prediction)
-    # validation_prediction = np.around(validation_prediction)
-    # test_prediction = np.around(test_prediction)
 
 
-    # # calculate minumum
-    # train_sum_matrix = []
-    # validation_sum_matrix = []
-
-    # for count in range(1, max_iterations):
-    #     mean = np.mean(y_train_vector != training_prediction[:, count-1])
-
-    #     train_sum_matrix.append(mean)
-
-    # # must use enumerate otherwise get the error ""'numpy.float64' object is not iterable"
-    # train_min_index, train_min_value = min(enumerate(train_sum_matrix))
-    # validation_min_index, validation_min_value = min(enumerate(train_sum_matrix))
+    ######################## CALCULATE LOGISTIC REGRESSION ########################
 
 
-    # # calculate loss
+    training_prediction = np.dot(X_train_data, train_pred_matrix)
+    print(training_prediction)
+    validation_prediction = np.dot(X_validation_data, val_pred_matrix)
+    test_prediction = np.dot(X_test_data, test_pred_matrix)
 
-    # training_loss_result_matrix = []
-    # validation_loss_result_matrix = []
+    sigmoid_vector = np.vectorize(calculate_sigmoid)
 
-    # print(y_train_vector.shape)
-    # print(training_prediction.shape)
+    # used to set numbers above 0 to 1 and below 0 to -1
+    training_prediction = sigmoid_vector(training_prediction)
+    validation_prediction = sigmoid_vector(validation_prediction)
+    test_prediction = sigmoid_vector(test_prediction)
 
-    # # create loss validation matrices
-    # for number in range(max_iterations):
-    #     training_loss_result_matrix.append(sklearn.metrics.log_loss(y_train_vector, training_prediction[:, number]))
-    #     validation_loss_result_matrix.append(sklearn.metrics.log_loss(y_validation_vector, validation_prediction[:, number]))
+    # calculate loss
 
+    training_loss_result_matrix = []
+    validation_loss_result_matrix = []
 
-    # # print(training_loss_result_matrix)
-    # # print(validation_loss_result_matrix)
+    # create loss validation matrices
+    for number in range(max_iterations):
+        training_loss_result_matrix.append(sklearn.metrics.log_loss(y_train_vector, training_prediction[:, number]))
+        validation_loss_result_matrix.append(sklearn.metrics.log_loss(y_validation_vector, validation_prediction[:, number]))
 
-    # with open("zipLogLoss.csv", mode = 'w') as roc_file:
+    with open("zipLogLoss.csv", mode = 'w') as roc_file:
 
-    #     fieldnames = ['train loss', 'validation loss']
-    #     writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+        fieldnames = ['train loss', 'validation loss']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
-    #     writer.writeheader()
+        writer.writeheader()
 
-    #     for index in range(max_iterations):
-    #         writer.writerow({'train loss': training_loss_result_matrix[index],
-    #                         "validation loss": validation_loss_result_matrix[index]})
+        for index in range(max_iterations):
+            writer.writerow({'train loss': training_loss_result_matrix[index],
+                            "validation loss": validation_loss_result_matrix[index]})
 
 
 
 
-    # ######################## CALCULATE ROC CURVE ########################
+    ######################## CALCULATE ROC CURVE ########################
 
-    # fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction[:, validation_min_index])
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction[:, validation_min_index])
 
-    # # calculate roc curves for logistic regression and baseline
-    # #fpr, tpr, thresho= roc_curve(y_test, sig_v(np.dot(X_test, weightMatrix))[:, val_min_index])
-    # # log_roc.append((fpr_log, tpr_log))
+    # calculate roc curves for logistic regression and baseline
+    #fpr, tpr, thresho= roc_curve(y_test, sig_v(np.dot(X_test, weightMatrix))[:, val_min_index])
+    # log_roc.append((fpr_log, tpr_log))
 
-    # with open("zipROC.csv", mode = 'w') as roc_file:
+    with open("zipROC.csv", mode = 'w') as roc_file:
 
-    #     fieldnames = ['FPR', 'TPR', 'Threshold']
-    #     writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+        fieldnames = ['FPR', 'TPR', 'Threshold']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
 
-    #     writer.writeheader()
+        writer.writeheader()
 
-    #     for index in range(len(fpr)):
-    #         writer.writerow({'FPR': fpr[index], "TPR": tpr[index], 'Threshold': thresholds})
+        for index in range(len(fpr)):
+            writer.writerow({'FPR': fpr[index], "TPR": tpr[index], 'Threshold': thresholds})
 
 
 

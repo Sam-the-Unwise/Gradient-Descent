@@ -212,8 +212,8 @@ def main():
     print("                y")
     print("set              0     1")
     print("test            " + str(np.sum(y_test_vector == 0)) + "  " + str(np.sum(y_test_vector == 1)))
-    print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
     print("train           " + str(np.sum(y_train_vector == 0)) + "  " + str(np.sum(y_train_vector == 1)))
+    print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
 
 
 
