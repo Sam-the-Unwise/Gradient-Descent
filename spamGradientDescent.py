@@ -216,13 +216,17 @@ def main():
 
     # print out amount of 0s and 1s in each set
     print("                y")
+
     print("set              0     1")
+
     print("test            " 
             + str(np.sum(y_test_vector == 0)) 
             + "  " + str(np.sum(y_test_vector == 1)))
+    
     print("train           " 
             + str(np.sum(y_train_vector == 0)) 
             + "  " + str(np.sum(y_train_vector == 1)))
+    
     print("val             " 
             + str(np.sum(y_validation_vector == 0)) 
             + "  " + str(np.sum(y_validation_vector == 1)))
@@ -233,11 +237,19 @@ def main():
     max_iterations = 1500
     step_size = .5
 
-    train_pred_matrix = gradientDescent(X_train_data, y_train_vector, 
-                                        step_size, max_iterations)
-    val_pred_matrix = gradientDescent(X_validation_data, y_validation_vector, 
-                                        step_size, max_iterations)
-    test_pred_matrix = gradientDescent(X_test_data, y_test_vector, step_size,
+    train_pred_matrix = gradientDescent(X_train_data, 
+                                        y_train_vector, 
+                                        step_size, 
+                                        max_iterations)
+
+    val_pred_matrix = gradientDescent(X_validation_data, 
+                                        y_validation_vector, 
+                                        step_size, 
+                                        max_iterations)
+
+    test_pred_matrix = gradientDescent(X_test_data, 
+                                        y_test_vector, 
+                                        step_size, 
                                         max_iterations)
 
 
@@ -267,26 +279,23 @@ def main():
 
         train_sum_matrix.append(mean)
 
-    # must use enumerate otherwise get the error ""'numpy.float64' object is not iterable"
-    train_min_index, train_min_value = min(enumerate(train_sum_matrix))
-    validation_min_index, validation_min_value = min(enumerate(train_sum_matrix))
+    # must use enumerate otherwise get the error 
+    #       ""'numpy.float64' object is not iterable"
+    val_min_index, val_min_value = min(enumerate(train_sum_matrix))
 
 
     # create loss validation matrices
     training_loss_result_matrix = []
     validation_loss_result_matrix = []
 
-    
     for number in range(max_iterations):
-        # get log loss of training set
-        training_log_loss = sklearn.metrics.log_loss(y_train_vector,
-                                            training_prediction[:, number])
-        training_loss_result_matrix.append(training_log_loss)
+        train_log_loss = sklearn.metrics.log_loss(y_train_vector, 
+                                                training_prediction[:, number])
+        val_log_loss = sklearn.metrics.log_loss(y_validation_vector, 
+                                                validation_prediction[:, number])
 
-        # get log loss of validation set
-        validation_log_loss = sklearn.metrics.log_loss(y_validation_vector,
-                                            validation_prediction[:, number])
-        validation_loss_result_matrix.append(validation_log_loss)
+        training_loss_result_matrix.append(train_log_loss)
+        validation_loss_result_matrix.append(val_log_loss)
 
 
     # write to file so it can be graphed with R
@@ -299,7 +308,7 @@ def main():
 
         for index in range(max_iterations):
             writer.writerow({'train loss': training_loss_result_matrix[index],
-                           "validation loss": validation_loss_result_matrix[index]})
+                    "validation loss": validation_loss_result_matrix[index]})
 
 
 
@@ -308,7 +317,7 @@ def main():
 
     # calculate roc curves for logistic regression and baseline
     fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, 
-                                    test_prediction[:, validation_min_index])
+                                    test_prediction[:, val_min_index])
 
     # write to file so it can be graphed with R
     with open("spamROC.csv", mode = 'w') as roc_file:

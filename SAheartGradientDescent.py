@@ -5,7 +5,7 @@
 #            Jacob Christiansen
 # DESCRIPTION: program that will find and graph gradientDescent on the
 #       provided data set -- in this case SAheart.data
-# VERSION: 2.3.2v
+# VERSION: 2.7.2v
 #
 ###############################################################################
 
@@ -15,7 +15,6 @@ from math import sqrt
 import sklearn.metrics
 import sys
 import math
-
 
 
 # Function: calculate_gradient
@@ -59,13 +58,6 @@ def gradientDescent(X, y, step_size, max_iterations):
     # variable that initiates to the weight vector
     weight_vector = np.zeros(X_arr_col)
 
-    # matrix for real numbers
-    #   row of #s = num of inputs
-    #   num of cols = maxIterations
-    # weight_matrix = np.array(np
-    #                     .zeros(wm_total_entries)
-    #                     .reshape(X_arr_col, max_iterations))
-
     array_of_zeros = []
 
     for i in range(X_arr_col):
@@ -93,7 +85,10 @@ def gradientDescent(X, y, step_size, max_iterations):
             inner_exp = 0
 
             # variables for simplification
-            gradient = calculate_gradient(X[index,:], y_tild, step_size, weight_vector_transpose)
+            gradient = calculate_gradient(X[index,:], 
+                                            y_tild, 
+                                            step_size, 
+                                            weight_vector_transpose)
 
             grad_log_losss += gradient
 
@@ -103,7 +98,8 @@ def gradientDescent(X, y, step_size, max_iterations):
         # update weight_vector depending on positive or negative
         weight_vector -= np.multiply(step_size, mean_grad_log_loss)
 
-        # store the resulting weight_vector in the corresponding column weight_matrix
+        # store the resulting weight_vector in the corresponding 
+        #   column weight_matrix
         weight_matrix = np.vstack((weight_matrix, np.array(weight_vector)))
 
     # get rid of initial zeros matrix that was added
@@ -113,6 +109,7 @@ def gradientDescent(X, y, step_size, max_iterations):
 
     # end of algorithm
     return weight_matrix
+
 
 
 
@@ -157,7 +154,8 @@ def convert_data_to_matrix(file_name):
 #   X : matrix to be split
 # Return: train, validation, test
 def split_matrix(X):
-    train, validation, test = np.split( X, [int(.6 * len(X)), int(.8 * len(X))])
+    train, validation, test = np.split( X, [int(.6 * len(X)), 
+                                            int(.8 * len(X))])
 
     return (train, validation, test)
 
@@ -191,14 +189,6 @@ def main():
 
     data_matrix_test = np.delete(data_matrix_full, col_length - 1, 1)
 
-    x = float('nan')
-
-    for item in data_matrix_test:
-        for value in item:
-            if(math.isnan(value)):
-                value = (np.where(data_matrix_test == item))
-                print(value)
-
 
     binary_vector = data_matrix_full[:,col_length - 1]
     # calculate train, test, and validation data
@@ -221,32 +211,49 @@ def main():
     scale(X_validation_data)
     scale(X_test_data)
 
-    print(np.mean(X_train_data))
-    print(np.mean(X_validation_data))
-    print(np.mean(X_test_data))
-
     y_train_vector = train[:,train.shape[1] - 1]
     y_validation_vector = validation[:,train.shape[1] - 1]
     y_test_vector = test[:,train.shape[1] - 1]
 
     # print out amount of 0s and 1s in each set
     print("                y")
+
     print("set              0     1")
-    print("test            " + str(np.sum(y_test_vector == 0)) + "  " + str(np.sum(y_test_vector == 1)))
-    print("train           " + str(np.sum(y_train_vector == 0)) + "  " + str(np.sum(y_train_vector == 1)))
-    print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
+
+    print("test            " 
+            + str(np.sum(y_test_vector == 0)) 
+            + "  " + str(np.sum(y_test_vector == 1)))
+
+    print("train           " 
+            + str(np.sum(y_train_vector == 0)) 
+            + "  " + str(np.sum(y_train_vector == 1)))
+
+    print("val             " 
+            + str(np.sum(y_validation_vector == 0)) 
+            + "  " + str(np.sum(y_validation_vector == 1)))
 
 
     max_iterations = 1500
     step_size = .5
 
-    train_pred_matrix = gradientDescent(X_train_data, y_train_vector, step_size, max_iterations)
-    val_pred_matrix = gradientDescent(X_validation_data, y_validation_vector, step_size, max_iterations)
-    test_pred_matrix = gradientDescent(X_test_data, y_test_vector, step_size, max_iterations)
+    train_pred_matrix = gradientDescent(X_train_data, 
+                                        y_train_vector, 
+                                        step_size, 
+                                        max_iterations)
+
+    val_pred_matrix = gradientDescent(X_validation_data, 
+                                        y_validation_vector, 
+                                        step_size, 
+                                        max_iterations)
+
+    test_pred_matrix = gradientDescent(X_test_data, 
+                                        y_test_vector, 
+                                        step_size, 
+                                        max_iterations)
 
     np.set_printoptions(threshold=sys.maxsize)
 
-    ######################## CALCULATE LOGISTIC REGRESSION ########################
+    ###################### CALCULATE LOGISTIC REGRESSION ######################
 
     # get dot product of matrixes
     training_prediction = np.matmul(X_train_data, train_pred_matrix)
@@ -270,24 +277,25 @@ def main():
 
         train_sum_matrix.append(mean)
 
-    # must use enumerate otherwise get the error ""'numpy.float64' object is not iterable"
+    # must use enumerate otherwise get the error 
+    #   ""'numpy.float64' object is not iterable"
     train_min_index, train_min_value = min(enumerate(train_sum_matrix))
-    validation_min_index, validation_min_value = min(enumerate(train_sum_matrix))
+    val_min_index, val_min_value = min(enumerate(train_sum_matrix))
 
 
-    # calculate loss
-
+    # create loss validation matrices
     training_loss_result_matrix = []
     validation_loss_result_matrix = []
 
-    # create loss validation matrices
     for number in range(max_iterations):
-        training_loss_result_matrix.append(sklearn.metrics.log_loss(y_train_vector, training_prediction[:, number]))
-        validation_loss_result_matrix.append(sklearn.metrics.log_loss(y_validation_vector, validation_prediction[:, number]))
+        train_log_loss = sklearn.metrics.log_loss(y_train_vector, 
+                                                training_prediction[:, number])
+        val_log_loss = sklearn.metrics.log_loss(y_validation_vector, 
+                                            validation_prediction[:, number])
 
+        training_loss_result_matrix.append(train_log_loss)
+        validation_loss_result_matrix.append(val_log_loss)
 
-    # print(training_loss_result_matrix)
-    # print(validation_loss_result_matrix)
 
     with open("SAheartLogLoss.csv", mode = 'w') as roc_file:
 
@@ -298,10 +306,10 @@ def main():
 
         for index in range(max_iterations):
             writer.writerow({'train loss': training_loss_result_matrix[index],
-                            "validation loss": validation_loss_result_matrix[index]})
+                    "validation loss": validation_loss_result_matrix[index]})
 
 
-    ######################## CALCULATE ROC CURVE ########################
+    ########################### CALCULATE ROC CURVE ###########################
 
     # calculate minumum
     train_sum_matrix = []
@@ -312,17 +320,15 @@ def main():
 
         train_sum_matrix.append(mean)
 
-    # must use enumerate otherwise get the error ""'numpy.float64' object is not iterable"
-    train_min_index, train_min_value = min(enumerate(train_sum_matrix))
-    validation_min_index, validation_min_value = min(enumerate(train_sum_matrix))
+    # must use enumerate otherwise get the error 
+    #           ""'numpy.float64' object is not iterable"
+    val_min_index, val_min_value = min(enumerate(train_sum_matrix))
 
 
-    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction[:, validation_min_index])
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, 
+                                    test_prediction[:, val_min_index])
 
     # calculate roc curves for logistic regression and baseline
-    #fpr, tpr, thresho= roc_curve(y_test, sig_v(np.dot(X_test, weightMatrix))[:, val_min_index])
-    # log_roc.append((fpr_log, tpr_log))
-
     with open("SAheartROC.csv", mode = 'w') as roc_file:
 
         fieldnames = ['FPR', 'TPR', 'Threshold']
@@ -331,17 +337,41 @@ def main():
         writer.writeheader()
 
         for index in range(len(fpr)):
-            writer.writerow({'FPR': fpr[index], "TPR": tpr[index], 'Threshold': thresholds})
+            writer.writerow({'FPR': fpr[index], 
+                            "TPR": tpr[index], 
+                            'Threshold': thresholds})
 
 
+    ######################### CALCULATE PERCENT ERROR #########################
+    train_percent_error = []
+    validation_percent_error = []
+    test_percent_error = []
+
+    for num in range(max_iterations):
+        # compare prediction matrix with original vector to see if results are 
+        #   correct
+        train_mean = np.mean(training_prediction[:, num] != y_train_vector)
+        val_mean = np.mean(validation_prediction[:, num] != y_validation_vector)
+        test_mean = np.mean(test_prediction[:, num] != y_test_vector)
+
+        train_percent_error.append(train_mean)
+        validation_percent_error.append(val_mean)
+        test_percent_error.append(test_mean)
+
+    # write to file so it can be graphed with R
+    with open("SAheartPercentError.csv", mode = 'w') as roc_file:
+
+        fieldnames = ['test error', 'training error', 'validation error']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+
+        writer.writeheader()
+
+        for index in range(max_iterations):
+            writer.writerow({'test error': test_percent_error[index], 
+                            "training error": train_percent_error[index], 
+                            'validation error': validation_percent_error[index]})
 
 
 
 # call our main
 main()
-
-# all_data = np.genfromtxt('SAheart.data', delimiter=",")
-# # get size of data
-# size = all_data.shape[1] - 1
-
-# print(all_data[:,5])

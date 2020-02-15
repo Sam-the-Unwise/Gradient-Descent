@@ -5,7 +5,7 @@
 #            Jacob Christiansen
 # DESCRIPTION: program that will find and graph gradientDescent on the
 #       provided data set -- in this case SAheart.data
-# VERSION: 2.3.2v
+# VERSION: 2.5.0v
 #
 ###############################################################################
 
@@ -84,7 +84,10 @@ def gradientDescent(X, y, step_size, max_iterations):
             inner_exp = 0
 
             # variables for simplification
-            gradient = calculate_gradient(X[index,:], y_tild, step_size, weight_vector_transpose)
+            gradient = calculate_gradient(X[index,:], 
+                                            y_tild, 
+                                            step_size, 
+                                            weight_vector_transpose)
 
             grad_log_losss += gradient
 
@@ -225,28 +228,46 @@ def main():
 
     # print out amount of 0s and 1s in each set
     print("                y")
+    
     print("set              0     1")
-    print("test            " + str(np.sum(y_test_vector == 0)) + "  " + str(np.sum(y_test_vector == 1)))
-    print("train           " + str(np.sum(y_train_vector == 0)) + "  " + str(np.sum(y_train_vector == 1)))
-    print("val             " + str(np.sum(y_validation_vector == 0)) + "  " + str(np.sum(y_validation_vector == 1)))
+
+    print("test            " 
+            + str(np.sum(y_test_vector == 0)) 
+            + "  " + str(np.sum(y_test_vector == 1)))
+
+    print("train           " 
+            + str(np.sum(y_train_vector == 0)) 
+            + "  " + str(np.sum(y_train_vector == 1)))
+
+    print("val             " 
+            + str(np.sum(y_validation_vector == 0)) 
+            + "  " + str(np.sum(y_validation_vector == 1)))
 
 
     max_iterations = 1500
     step_size = .5
 
-    train_pred_matrix = gradientDescent(X_train_data, y_train_vector, step_size, max_iterations)
-    val_pred_matrix = gradientDescent(X_validation_data, y_validation_vector, step_size, max_iterations)
-    test_pred_matrix = gradientDescent(X_test_data, y_test_vector, step_size, max_iterations)
+    train_pred_matrix = gradientDescent(X_train_data, 
+                                        y_train_vector, 
+                                        step_size, 
+                                        max_iterations)
 
+    val_pred_matrix = gradientDescent(X_validation_data, 
+                                        y_validation_vector, 
+                                        step_size, 
+                                        max_iterations)
+
+    test_pred_matrix = gradientDescent(X_test_data, 
+                                        y_test_vector, 
+                                        step_size, 
+                                        max_iterations)
 
 
 
 
     ######################## CALCULATE LOGISTIC REGRESSION ########################
 
-
     training_prediction = np.dot(X_train_data, train_pred_matrix)
-    print(training_prediction)
     validation_prediction = np.dot(X_validation_data, val_pred_matrix)
     test_prediction = np.dot(X_test_data, test_pred_matrix)
 
@@ -257,16 +278,21 @@ def main():
     validation_prediction = sigmoid_vector(validation_prediction)
     test_prediction = sigmoid_vector(test_prediction)
 
-    # calculate loss
 
+    # create loss validation matrices
     training_loss_result_matrix = []
     validation_loss_result_matrix = []
 
-    # create loss validation matrices
     for number in range(max_iterations):
-        training_loss_result_matrix.append(sklearn.metrics.log_loss(y_train_vector, training_prediction[:, number]))
-        validation_loss_result_matrix.append(sklearn.metrics.log_loss(y_validation_vector, validation_prediction[:, number]))
+        train_log_loss = sklearn.metrics.log_loss(y_train_vector, 
+                                                training_prediction[:, number])
+        val_log_loss = sklearn.metrics.log_loss(y_validation_vector, 
+                                            validation_prediction[:, number])
 
+        training_loss_result_matrix.append(train_log_loss)
+        validation_loss_result_matrix.append(val_log_loss)
+
+    
     with open("zipLogLoss.csv", mode = 'w') as roc_file:
 
         fieldnames = ['train loss', 'validation loss']
@@ -292,16 +318,13 @@ def main():
 
         train_sum_matrix.append(mean)
 
-    # must use enumerate otherwise get the error ""'numpy.float64' object is not iterable"
-    train_min_index, train_min_value = min(enumerate(train_sum_matrix))
-    validation_min_index, validation_min_value = min(enumerate(train_sum_matrix))
+    # must use enumerate otherwise get the error 
+    #       ""'numpy.float64' object is not iterable"
+    val_min_index, val_min_value = min(enumerate(train_sum_matrix))
 
-
-    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, test_prediction[:, validation_min_index])
-
-    # calculate roc curves for logistic regression and baseline
-    #fpr, tpr, thresho= roc_curve(y_test, sig_v(np.dot(X_test, weightMatrix))[:, val_min_index])
-    # log_roc.append((fpr_log, tpr_log))
+    # calculate ROC curve
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test_vector, 
+                                test_prediction[:, val_min_index])
 
     with open("zipROC.csv", mode = 'w') as roc_file:
 
@@ -311,10 +334,41 @@ def main():
         writer.writeheader()
 
         for index in range(len(fpr)):
-            writer.writerow({'FPR': fpr[index], "TPR": tpr[index], 'Threshold': thresholds})
+            writer.writerow({'FPR': fpr[index], 
+                            'TPR': tpr[index], 
+                            'Threshold': thresholds})
 
 
 
+
+    ######################### CALCULATE PERCENT ERROR #########################
+    train_percent_error = []
+    validation_percent_error = []
+    test_percent_error = []
+
+    for num in range(max_iterations):
+        # compare prediction matrix with original vector to see if results are 
+        #      correct
+        train_mean = np.mean(training_prediction[:, num] != y_train_vector)
+        val_mean = np.mean(validation_prediction[:, num] != y_validation_vector)
+        test_mean = np.mean(test_prediction[:, num] != y_test_vector)
+
+        train_percent_error.append(train_mean)
+        validation_percent_error.append(val_mean)
+        test_percent_error.append(test_mean)
+
+    # write to file so it can be graphed with R
+    with open("zipPercentError.csv", mode = 'w') as roc_file:
+
+        fieldnames = ['test error', 'training error', 'validation error']
+        writer = csv.DictWriter(roc_file, fieldnames = fieldnames)
+
+        writer.writeheader()
+
+        for index in range(max_iterations):
+            writer.writerow({'test error': test_percent_error[index], 
+                            'training error': train_percent_error[index], 
+                            'validation error': validation_percent_error[index]})
 
 
 # call our main
