@@ -231,9 +231,9 @@ def main():
     ######################## CALCULATE LOGISTIC REGRESSION ########################
 
     # get dot product of matrixes
-    training_prediction = np.dot(X_train_data, train_pred_matrix)
-    validation_prediction = np.dot(X_validation_data, val_pred_matrix)
-    test_prediction = np.dot(X_test_data, test_pred_matrix)
+    training_prediction = np.matmul(X_train_data, train_pred_matrix)
+    validation_prediction = np.matmul(X_validation_data, val_pred_matrix)
+    test_prediction = np.matmul(X_test_data, test_pred_matrix)
 
     sigmoid_vector = np.vectorize(calculate_sigmoid)
 

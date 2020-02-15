@@ -217,9 +217,13 @@ def main():
     X_test_data = np.delete(test, col_length - 1, 1)
     X_test_data = np.array(X_test_data, dtype=np.float128)
 
-    # scale(X_train_data)
-    # scale(X_validation_data)
-    # scale(X_test_data)
+    scale(X_train_data)
+    scale(X_validation_data)
+    scale(X_test_data)
+
+    print(np.mean(X_train_data))
+    print(np.mean(X_validation_data))
+    print(np.mean(X_test_data))
 
     y_train_vector = train[:,train.shape[1] - 1]
     y_validation_vector = validation[:,train.shape[1] - 1]
@@ -245,9 +249,9 @@ def main():
     ######################## CALCULATE LOGISTIC REGRESSION ########################
 
     # get dot product of matrixes
-    training_prediction = np.dot(X_train_data, train_pred_matrix)
-    validation_prediction = np.dot(X_validation_data, val_pred_matrix)
-    test_prediction = np.dot(X_test_data, test_pred_matrix)
+    training_prediction = np.matmul(X_train_data, train_pred_matrix)
+    validation_prediction = np.matmul(X_validation_data, val_pred_matrix)
+    test_prediction = np.matmul(X_test_data, test_pred_matrix)
 
     sigmoid_vector = np.vectorize(calculate_sigmoid)
 

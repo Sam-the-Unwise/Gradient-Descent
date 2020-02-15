@@ -127,9 +127,11 @@ def scale(matrix):
             col_sq_sum += ((item - mean)**2)
 
         std = sqrt(col_sq_sum/col_size)
-
-        column -= mean
-        column /= std
+        if std == 0:
+            matrix = np.delete(matrix, counter)
+        else:
+            column -= mean
+            column /= std
 
 
 # Function: convert_data_to_matrix
@@ -212,6 +214,10 @@ def main():
     scale(X_train_data)
     scale(X_validation_data)
     scale(X_test_data)
+
+    print(np.mean(X_train_data))
+    print(np.mean(X_validation_data))
+    print(np.mean(X_test_data))
 
     y_train_vector = np.array(train[:,0]).astype(int)
     y_validation_vector = np.array(validation[:,0]).astype(int)
