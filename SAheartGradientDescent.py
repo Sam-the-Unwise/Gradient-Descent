@@ -9,12 +9,15 @@
 #
 ###############################################################################
 
+import sys, math, csv
 import numpy as np
-import csv
-from math import sqrt
 import sklearn.metrics
-import sys
-import math
+from math import sqrt
+from sklearn.preprocessing import scale
+
+
+MAX_ITERATIONS = 1500
+STEP_SIZE = .5
 
 
 # Function: calculate_gradient
@@ -113,32 +116,32 @@ def gradientDescent(X, y, step_size, max_iterations):
 
 
 
-# Function: scale
-# INPUT ARGS:
-#   matrix : the matrix that we need to scale
-# Return: [none]
-def scale(matrix):
-    matrix_t = np.transpose(matrix)
-    counter = 0
+# # Function: scale
+# # INPUT ARGS:
+# #   matrix : the matrix that we need to scale
+# # Return: [none]
+# def scale(matrix):
+#     matrix_t = np.transpose(matrix)
+#     counter = 0
 
-    for column in matrix_t:
-        counter += 1
-        col_sq_sum = 0
+#     for column in matrix_t:
+#         counter += 1
+#         col_sq_sum = 0
 
-        sum = np.sum(column)
-        shape = column.shape
-        col_size = shape[0]
-        mean = sum/col_size
+#         sum = np.sum(column)
+#         shape = column.shape
+#         col_size = shape[0]
+#         mean = sum/col_size
 
-        for item in column:
-            col_sq_sum += ((item - mean)**2)
+#         for item in column:
+#             col_sq_sum += ((item - mean)**2)
 
-        std = sqrt(col_sq_sum/col_size)
-        if std == 0:
-            matrix = np.delete(matrix, counter)
-        else:
-            column -= mean
-            column /= std
+#         std = sqrt(col_sq_sum/col_size)
+#         if std == 0:
+#             matrix = np.delete(matrix, counter)
+#         else:
+#             column -= mean
+#             column /= std
 
 
 # Function: convert_data_to_matrix
@@ -235,23 +238,20 @@ def main():
             + "  " + str(np.sum(y_validation_vector == 1)))
 
 
-    max_iterations = 1500
-    step_size = .5
-
     train_pred_matrix = gradientDescent(X_train_data, 
                                         y_train_vector, 
-                                        step_size, 
-                                        max_iterations)
+                                        STEP_SIZE, 
+                                        MAX_ITERATIONS)
 
     val_pred_matrix = gradientDescent(X_validation_data, 
                                         y_validation_vector, 
-                                        step_size, 
-                                        max_iterations)
+                                        STEP_SIZE, 
+                                        MAX_ITERATIONS)
 
     test_pred_matrix = gradientDescent(X_test_data, 
                                         y_test_vector, 
-                                        step_size, 
-                                        max_iterations)
+                                        STEP_SIZE, 
+                                        MAX_ITERATIONS)
 
     np.set_printoptions(threshold=sys.maxsize)
 
@@ -274,7 +274,7 @@ def main():
     train_sum_matrix = []
     validation_sum_matrix = []
 
-    for count in range(1, max_iterations):
+    for count in range(MAX_ITERATIONS):
         mean = np.mean(y_train_vector != training_prediction[:, count-1])
 
         train_sum_matrix.append(mean)
@@ -289,7 +289,7 @@ def main():
     training_loss_result_matrix = []
     validation_loss_result_matrix = []
 
-    for number in range(max_iterations):
+    for number in range(MAX_ITERATIONS):
         train_log_loss = sklearn.metrics.log_loss(y_train_vector, 
                                                 training_prediction[:, number])
         val_log_loss = sklearn.metrics.log_loss(y_validation_vector, 
@@ -306,7 +306,7 @@ def main():
 
         writer.writeheader()
 
-        for index in range(max_iterations):
+        for index in range(MAX_ITERATIONS):
             writer.writerow({'train loss': training_loss_result_matrix[index],
                     "validation loss": validation_loss_result_matrix[index]})
 
@@ -317,7 +317,7 @@ def main():
     train_sum_matrix = []
     validation_sum_matrix = []
 
-    for count in range(1, max_iterations):
+    for count in range(1, MAX_ITERATIONS):
         mean = np.mean(y_train_vector != training_prediction[:, count-1])
 
         train_sum_matrix.append(mean)
@@ -349,7 +349,7 @@ def main():
     validation_percent_error = []
     test_percent_error = []
 
-    for num in range(max_iterations):
+    for num in range(MAX_ITERATIONS):
         # compare prediction matrix with original vector to see if results are 
         #   correct
         train_mean = np.mean(training_prediction[:, num] != y_train_vector)
@@ -368,7 +368,7 @@ def main():
 
         writer.writeheader()
 
-        for index in range(max_iterations):
+        for index in range(MAX_ITERATIONS):
             writer.writerow({'test error': test_percent_error[index], 
                             "training error": train_percent_error[index], 
                             'validation error': validation_percent_error[index]})
