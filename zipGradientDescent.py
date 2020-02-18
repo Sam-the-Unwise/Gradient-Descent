@@ -61,10 +61,10 @@ def gradientDescent(X, y, step_size, max_iterations):
     # variable that initiates to the weight vector
     weight_vector = np.zeros(X_arr_col)
 
-    array_of_zeros = []
+    array_of_zeros = [0] * X_arr_col
 
-    for i in range(X_arr_col):
-        array_of_zeros.append(0)
+    # for i in range(X_arr_col):
+    #     array_of_zeros.append(0)
 
     weight_matrix = np.array(array_of_zeros)
 
